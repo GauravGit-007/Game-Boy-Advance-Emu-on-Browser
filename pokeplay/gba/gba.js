@@ -65,7 +65,7 @@ function GameBoyAdvance() {
 
 	var self = this;
 	window.queueFrame = function (f) {
-		self.queue = window.setTimeout(f, self.throttle);
+		self.queue = window.requestAnimationFrame(f);
 	};
 
 	window.URL = window.URL || window.webkitURL;
@@ -156,7 +156,7 @@ GameBoyAdvance.prototype.pause = function() {
 	this.paused = true;
 	this.audio.pause(true);
 	if (this.queue) {
-		clearTimeout(this.queue);
+		window.cancelAnimationFrame(this.queue);
 		this.queue = null;
 	}
 };
@@ -184,57 +184,41 @@ GameBoyAdvance.prototype.runStable = function() {
 	var timer = 0;
 	var frames = 0;
 	var runFunc;
-	var start = Date.now();
+	var start = performance.now();
 	this.paused = false;
 	this.audio.pause(false);
 
-	if (this.reportFPS) {
-		runFunc = function() {
-			try {
-				timer += Date.now() - start;
-				if (self.paused) {
-					return;
-				} else {
-					queueFrame(runFunc);
-				}
-				start = Date.now();
-				for (var i = 0; i < self.multiplier; ++i) {
-					self.advanceFrame();
-				}
+	runFunc = function() {
+		try {
+			if (self.paused) return;
+			queueFrame(runFunc);
+
+			var now = performance.now();
+			timer += now - start;
+			start = now;
+
+			// Run frames based on multiplier (default 1)
+			for (var i = 0; i < self.multiplier; ++i) {
+				self.advanceFrame();
+			}
+
+			if (self.reportFPS) {
 				++frames;
 				if (frames == 60) {
 					self.reportFPS((frames * 1000) / timer);
 					frames = 0;
 					timer = 0;
 				}
-			} catch(exception) {
-				self.ERROR(exception);
-				if (exception.stack) {
-					self.logStackTrace(exception.stack.split('\n'));
-				}
-				throw exception;
 			}
-		};
-	} else {
-		runFunc = function() {
-			try {
-				if (self.paused) {
-					return;
-				} else {
-					queueFrame(runFunc);
-				}
-				for (var i = 0; i < self.multiplier; ++i) {
-					self.advanceFrame();
-				}
-			} catch(exception) {
-				self.ERROR(exception);
-				if (exception.stack) {
-					self.logStackTrace(exception.stack.split('\n'));
-				}
-				throw exception;
+		} catch(exception) {
+			self.ERROR(exception);
+			if (exception.stack) {
+				self.logStackTrace(exception.stack.split('\n'));
 			}
-		};
-	}
+			throw exception;
+		}
+	};
+
 	queueFrame(runFunc);
 };
 
