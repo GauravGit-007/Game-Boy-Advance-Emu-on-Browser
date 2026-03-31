@@ -1191,6 +1191,7 @@
       setStatus('Running: ' + romName, 'running');
       // Apply current speed to new GBA instance
       if (gba) gba.multiplier = currentSpeed; 
+      renderSaveSlots(); // Refresh slots for the current game
       showToast('▶ Game started!', 'success');
     } catch(e) {
       console.error('[PokePlay] ROM load failed:', e);
@@ -1272,8 +1273,17 @@
   }
 
   // ─── SAVE STATES ─────────────────────────────────────────────────
-  const SLOT_PREFIX = 'pokeplay_save_slot_';
+  const SLOT_BASE_PREFIX = 'pokeplay_save_slot_';
   const NUM_SLOTS = 3;
+
+  /**
+   * Generates a ROM-specific key for localStorage.
+   * This ensures save states are "synced" with the current game.
+   */
+  function getSlotKey(slotNum) {
+    const code = (gba && gba.mmu && gba.mmu.cart) ? gba.mmu.cart.code : 'GLOBAL';
+    return `${SLOT_BASE_PREFIX}${code}_${slotNum}`;
+  }
 
   /**
    * Renders the 3 save slots into the sidebar.
@@ -1285,7 +1295,7 @@
     container.innerHTML = '';
 
     for (let i = 1; i <= NUM_SLOTS; i++) {
-      const key = SLOT_PREFIX + i;
+      const key = getSlotKey(i);
       const raw = localStorage.getItem(key);
       let data = null;
       try { data = raw ? JSON.parse(raw) : null; } catch(e) { data = null; }
@@ -1328,7 +1338,7 @@
         label: 'Slot ' + slotNum,
         state: btoa(JSON.stringify(state))
       };
-      localStorage.setItem(SLOT_PREFIX + slotNum, JSON.stringify(payload));
+      localStorage.setItem(getSlotKey(slotNum), JSON.stringify(payload));
       renderSaveSlots();
       showToast(`✓ Saved to Slot ${slotNum}`, 'success');
     } catch(e) {
@@ -1345,7 +1355,7 @@
    * @param {number} slotNum - Slot index 1–3
    */
   function loadState(slotNum) {
-    const key = SLOT_PREFIX + slotNum;
+    const key = getSlotKey(slotNum);
     const raw = localStorage.getItem(key);
     if (!raw) { showToast('No save in this slot.', 'error'); return; }
 
@@ -1388,7 +1398,7 @@
    * @param {number} slotNum - Slot index 1–3
    */
   function deleteState(slotNum) {
-    localStorage.removeItem(SLOT_PREFIX + slotNum);
+    localStorage.removeItem(getSlotKey(slotNum));
     renderSaveSlots();
     showToast(`Slot ${slotNum} cleared.`, 'info');
   }
