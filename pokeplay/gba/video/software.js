@@ -853,10 +853,129 @@ GameBoyAdvanceSoftwareRenderer.prototype.clearSubsets = function(mmu, regions) {
 	}
 };
 
+
 GameBoyAdvanceSoftwareRenderer.prototype.freeze = function() {
+	var palette = new Uint16Array(512);
+	for (var i = 0; i < 512; ++i) {
+		palette[i] = this.palette.loadU16(i << 1);
+	}
+	return {
+		'palette': Serializer.prefix(palette.buffer),
+		'vram': Serializer.prefix(this.vram.buffer.buffer),
+		'oam': Serializer.prefix(this.oam.buffer.buffer),
+		'backgroundMode': this.backgroundMode,
+		'displayFrameSelect': this.displayFrameSelect,
+		'hblankIntervalFree': this.hblankIntervalFree,
+		'objCharacterMapping': this.objCharacterMapping,
+		'forcedBlank': this.forcedBlank,
+		'win0': this.win0,
+		'win1': this.win1,
+		'objwin': this.objwin,
+		'win0Left': this.win0Left,
+		'win0Right': this.win0Right,
+		'win1Left': this.win1Left,
+		'win1Right': this.win1Right,
+		'win0Top': this.win0Top,
+		'win0Bottom': this.win0Bottom,
+		'win1Top': this.win1Top,
+		'win1Bottom': this.win1Bottom,
+		'windows': this.windows,
+		'target1': this.target1,
+		'target2': this.target2,
+		'blendMode': this.blendMode,
+		'blendA': this.blendA,
+		'blendB': this.blendB,
+		'blendY': this.blendY,
+		'bgMosaicX': this.bgMosaicX,
+		'bgMosaicY': this.bgMosaicY,
+		'objMosaicX': this.objMosaicX,
+		'objMosaicY': this.objMosaicY,
+		'bg': this.bg.map(function(bg) {
+			return {
+				enabled: bg.enabled,
+				priority: bg.priority,
+				charBase: bg.charBase,
+				mosaic: bg.mosaic,
+				multipalette: bg.multipalette,
+				screenBase: bg.screenBase,
+				overflow: bg.overflow,
+				size: bg.size,
+				x: bg.x,
+				y: bg.y,
+				refx: bg.refx,
+				refy: bg.refy,
+				dx: bg.dx,
+				dmx: bg.dmx,
+				dy: bg.dy,
+				dmy: bg.dmy,
+				sx: bg.sx,
+				sy: bg.sy
+			};
+		})
+	};
 };
 
 GameBoyAdvanceSoftwareRenderer.prototype.defrost = function(frost) {
+	this.palette.overwrite(new Uint16Array(frost.palette));
+	this.vram.insert(0, new Uint16Array(frost.vram));
+	this.oam.overwrite(new Uint16Array(frost.oam));
+
+	this.backgroundMode = frost.backgroundMode;
+	this.displayFrameSelect = frost.displayFrameSelect;
+	this.hblankIntervalFree = frost.hblankIntervalFree;
+	this.objCharacterMapping = frost.objCharacterMapping;
+	this.forcedBlank = frost.forcedBlank;
+	this.win0 = frost.win0;
+	this.win1 = frost.win1;
+	this.objwin = frost.objwin;
+
+	this.win0Left = frost.win0Left;
+	this.win0Right = frost.win0Right;
+	this.win1Left = frost.win1Left;
+	this.win1Right = frost.win1Right;
+	this.win0Top = frost.win0Top;
+	this.win0Bottom = frost.win0Bottom;
+	this.win1Top = frost.win1Top;
+	this.win1Bottom = frost.win1Bottom;
+
+	this.windows = frost.windows;
+	this.target1 = frost.target1;
+	this.target2 = frost.target2;
+	this.blendMode = frost.blendMode;
+	this.blendA = frost.blendA;
+	this.blendB = frost.blendB;
+	this.blendY = frost.blendY;
+
+	this.bgMosaicX = frost.bgMosaicX;
+	this.bgMosaicY = frost.bgMosaicY;
+	this.objMosaicX = frost.objMosaicX;
+	this.objMosaicY = frost.objMosaicY;
+
+	for (var i = 0; i < 4; ++i) {
+		var bg = this.bg[i];
+		var fbg = frost.bg[i];
+		bg.enabled = fbg.enabled;
+		bg.priority = fbg.priority;
+		bg.charBase = fbg.charBase;
+		bg.mosaic = fbg.mosaic;
+		bg.multipalette = fbg.multipalette;
+		bg.screenBase = fbg.screenBase;
+		bg.overflow = fbg.overflow;
+		bg.size = fbg.size;
+		bg.x = fbg.x;
+		bg.y = fbg.y;
+		bg.refx = fbg.refx;
+		bg.refy = fbg.refy;
+		bg.dx = fbg.dx;
+		bg.dmx = fbg.dmx;
+		bg.dy = fbg.dy;
+		bg.dmy = fbg.dmy;
+		bg.sx = fbg.sx;
+		bg.sy = fbg.sy;
+	}
+
+	this.palette.resetPalettes();
+	this.resetLayers();
 };
 
 GameBoyAdvanceSoftwareRenderer.prototype.setBacking = function(backing) {

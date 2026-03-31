@@ -1388,7 +1388,14 @@
       
       Serializer.deserialize(stateBlob, (stateObject) => {
         try {
-          gba.defrost(stateObject);
+          gba.cpu.defrost(stateObject.cpu);
+          gba.mmu.defrost(stateObject.mmu);
+          gba.audio.defrost(stateObject.audio);
+          gba.video.defrost(stateObject.video);
+          gba.io.defrost(stateObject.io);
+          gba.irq.defrost(stateObject.irq);
+          gba.irq.pollNextEvent();
+          gba.seenFrame = false;
           showToast(`◎ Loaded Slot ${slotNum}`, 'success');
           setStatus('State restored', 'running');
         } catch(err) {

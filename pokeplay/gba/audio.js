@@ -145,12 +145,54 @@ GameBoyAdvanceAudio.prototype.clear = function() {
 
 GameBoyAdvanceAudio.prototype.freeze = function() {
 	return {
-		nextSample: this.nextSample
+		'enabled': this.enabled,
+		'ratioChannelA': this.ratioChannelA,
+		'ratioChannelB': this.ratioChannelB,
+		'enabledLeft': this.enabledLeft,
+		'enabledRight': this.enabledRight,
+		'soundRatio': this.soundRatio,
+		'soundBias': this.soundBias,
+		'squareChannels': this.squareChannels,
+		'waveData': Serializer.prefix(this.waveData.buffer),
+		'channel3Dimension': this.channel3Dimension,
+		'channel3Bank': this.channel3Bank,
+		'channel3Volume': this.channel3Volume,
+		'channel3Interval': this.channel3Interval,
+		'channel3Timed': this.channel3Timed,
+		'channel3End': this.channel3End,
+		'channel3Pointer': this.channel3Pointer,
+		'channel3Sample': this.channel3Sample,
+		'channel4': this.channel4,
+		'nextEvent': this.nextEvent,
+		'nextSample': this.nextSample,
+		'fifoA': this.fifoA,
+		'fifoB': this.fifoB
 	};
 };
 
 GameBoyAdvanceAudio.prototype.defrost = function(frost) {
+	this.enabled = frost.enabled;
+	this.ratioChannelA = frost.ratioChannelA;
+	this.ratioChannelB = frost.ratioChannelB;
+	this.enabledLeft = frost.enabledLeft;
+	this.enabledRight = frost.enabledRight;
+	this.soundRatio = frost.soundRatio;
+	this.soundBias = frost.soundBias;
+	this.squareChannels = frost.squareChannels;
+	this.waveData = new Uint8Array(frost.waveData);
+	this.channel3Dimension = frost.channel3Dimension;
+	this.channel3Bank = frost.channel3Bank;
+	this.channel3Volume = frost.channel3Volume;
+	this.channel3Interval = frost.channel3Interval;
+	this.channel3Timed = frost.channel3Timed;
+	this.channel3End = frost.channel3End;
+	this.channel3Pointer = frost.channel3Pointer;
+	this.channel3Sample = frost.channel3Sample;
+	this.channel4 = frost.channel4;
+	this.nextEvent = frost.nextEvent;
 	this.nextSample = frost.nextSample;
+	this.fifoA = frost.fifoA;
+	this.fifoB = frost.fifoB;
 };
 
 GameBoyAdvanceAudio.prototype.pause = function(paused) {

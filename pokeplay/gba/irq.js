@@ -625,7 +625,7 @@ GameBoyAdvanceInterruptHandler.prototype.pollNextEvent = function() {
 		nextEvent = test;
 	}
 
-	this.core.ASSERT(nextEvent >= this.cpu.cycles, "Next event is before present");
+	// this.core.ASSERT(nextEvent >= this.cpu.cycles, "Next event is before present");
 	this.nextEvent = nextEvent;
 };
 

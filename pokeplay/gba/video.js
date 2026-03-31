@@ -60,7 +60,7 @@ GameBoyAdvanceVideo.prototype.freeze = function() {
 		'nextHblankIRQ': this.nextHblankIRQ,
 		'nextVblankIRQ': this.nextVblankIRQ,
 		'nextVcounterIRQ': this.nextVcounterIRQ,
-		'renderPath': this.renderPath.freeze(this.core.encodeBase64)
+		'renderPath': this.renderPath.freeze()
 	};
 };
 
@@ -79,7 +79,7 @@ GameBoyAdvanceVideo.prototype.defrost = function(frost) {
 	this.nextHblankIRQ = frost.nextHblankIRQ;
 	this.nextVblankIRQ = frost.nextVblankIRQ;
 	this.nextVcounterIRQ = frost.nextVcounterIRQ;
-	this.renderPath.defrost(frost.renderPath, this.core.decodeBase64);
+	this.renderPath.defrost(frost.renderPath);
 };
 
 GameBoyAdvanceVideo.prototype.setBacking = function(backing) {

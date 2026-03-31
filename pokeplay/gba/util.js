@@ -66,7 +66,10 @@ Serializer = {
 					body = Serializer.prefix(stream[i]);
 					break;
 				case 'object':
-					if (stream[i].type == Serializer.TYPE) {
+					if (!stream[i]) {
+						tag = Serializer.TAG_INT;
+						body = Serializer.pack(0);
+					} else if (stream[i].type == Serializer.TYPE) {
 						tag = Serializer.TAG_BLOB;
 						body = stream[i];
 					} else {

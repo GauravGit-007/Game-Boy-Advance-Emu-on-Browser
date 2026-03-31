@@ -329,12 +329,16 @@ GameBoyAdvanceMMU.prototype.freeze = function() {
 	return {
 		'ram': Serializer.prefix(this.memory[this.REGION_WORKING_RAM].buffer),
 		'iram': Serializer.prefix(this.memory[this.REGION_WORKING_IRAM].buffer),
+		'save': this.save ? Serializer.prefix(this.save.buffer) : null
 	};
 };
 
 GameBoyAdvanceMMU.prototype.defrost = function(frost) {
 	this.memory[this.REGION_WORKING_RAM].replaceData(frost.ram);
 	this.memory[this.REGION_WORKING_IRAM].replaceData(frost.iram);
+	if (this.save && frost.save) {
+		this.save.replaceData(frost.save);
+	}
 };
 
 GameBoyAdvanceMMU.prototype.loadBios = function(bios, real) {
