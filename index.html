@@ -890,6 +890,7 @@
         justify-content: center;
       }
 
+      /* D-Pad Area -> NOW JOYSTICK BASE */
       .gba-shell:fullscreen .dpad {
         grid-area: dpad;
         justify-self: center;
@@ -904,10 +905,24 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        /* CRITICAL: Prevent mobile scrolling while using joystick */
+        touch-action: none;
       }
 
-      .gba-shell:fullscreen .dpad-btn,
-      .gba-shell:fullscreen .dpad-center { display: none; }
+      /* Control Mode: DPAD */
+      .gba-shell.mode-dpad:fullscreen .dpad {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+      }
+      .gba-shell.mode-dpad:fullscreen .dpad-btn,
+      .gba-shell.mode-dpad:fullscreen .dpad-center { display: block; }
+      .gba-shell.mode-dpad:fullscreen .joystick-knob { display: none !important; }
+
+      /* Control Mode: JOYSTICK */
+      .gba-shell.mode-joystick:fullscreen .dpad-btn,
+      .gba-shell.mode-joystick:fullscreen .dpad-center { display: none; }
+      .gba-shell.mode-joystick:fullscreen .joystick-knob { display: block !important; }
 
       .gba-shell:fullscreen .joystick-knob {
         display: block !important;
@@ -1066,6 +1081,7 @@
           </div>
           <div class="start-select">
             <div class="meta-btn" data-key="Backspace" id="btn-sel">SELECT</div>
+            <div class="meta-btn" id="btn-mode" onclick="toggleControlLayout()">🕹️ JOY</div>
             <div class="meta-btn" data-key="Enter"     id="btn-sta">START</div>
           </div>
         </div>
@@ -1205,6 +1221,11 @@
     initKeyboard();
     initOnScreenControls();
     initRomInput();
+    
+    // Load saved control layout
+    const savedLayout = localStorage.getItem('pokeplay_control_mode') || 'mode-joystick';
+    document.getElementById('gba-shell').classList.add(savedLayout);
+    updateLayoutToggleButton();
   });
 
   function initGBA() {
@@ -1287,6 +1308,27 @@
     currentSpeed = speed;
     document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.speed) === speed));
     if (gba) gba.multiplier = speed;
+  }
+
+  // ─── CONTROL LAYOUT TOGGLE ──────────────────────────────────────
+  function toggleControlLayout() {
+    const shell = document.getElementById('gba-shell');
+    const isJoystick = shell.classList.contains('mode-joystick');
+    
+    shell.classList.toggle('mode-joystick', !isJoystick);
+    shell.classList.toggle('mode-dpad', isJoystick);
+    
+    const newMode = isJoystick ? 'mode-dpad' : 'mode-joystick';
+    localStorage.setItem('pokeplay_control_mode', newMode);
+    updateLayoutToggleButton();
+    showToast(`Switched to ${isJoystick ? 'D-Pad' : 'Joystick'}`, 'info');
+  }
+
+  function updateLayoutToggleButton() {
+    const shell = document.getElementById('gba-shell');
+    const btn = document.getElementById('btn-mode');
+    const isJoystick = shell.classList.contains('mode-joystick');
+    btn.textContent = isJoystick ? '🕹️ JOY' : '🎮 DPAD';
   }
 
   const SLOT_BASE_PREFIX = 'pokeplay_save_slot_';
@@ -1451,32 +1493,106 @@
       '.dpad-btn:not(.dpad-center), .action-btn, .shoulder-btn, .meta-btn'
     );
 
+    // ─── STANDARD BUTTONS ─────────────────
     allBtns.forEach(btn => {
       const keyCode = btn.dataset.key;
       if (!keyCode) return;
 
       btn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        btn.setPointerCapture(e.pointerId);
-        btn.classList.add('pressed');
+        const shell = document.getElementById('gba-shell');
+        const isDpadMode = shell.classList.contains('mode-dpad');
+        const isDpadBtn = btn.classList.contains('dpad-btn');
+        
+        // If it's a D-pad button, only process if in D-pad mode
+        if (isDpadBtn && !isDpadMode) return;
+        
         if (navigator.vibrate) navigator.vibrate(15);
+        btn.classList.add('pressed');
         const key = KEY_MAP[keyCode];
         if (key !== undefined && gba && isRunning) gba.keyDown(key);
       });
 
-      btn.addEventListener('pointerup', (e) => {
-        e.preventDefault();
+      const releaseKey = () => {
         btn.classList.remove('pressed');
         const key = KEY_MAP[keyCode];
         if (key !== undefined && gba && isRunning) gba.keyUp(key);
-      });
+      };
 
-      btn.addEventListener('pointercancel', () => {
-        btn.classList.remove('pressed');
-        const key = KEY_MAP[keyCode];
-        if (key !== undefined && gba && isRunning) gba.keyUp(key);
-      });
+      btn.addEventListener('pointerup', releaseKey);
+      btn.addEventListener('pointercancel', releaseKey);
+      btn.addEventListener('pointerleave', releaseKey);
     });
+
+    // ─── VIRTUAL JOYSTICK ─────────────────
+    const base = document.getElementById('joystick-base');
+    const knob = document.getElementById('joystick-knob');
+    let isDragging = false;
+    let activeKeys = new Set();
+
+    const updateJoystickInput = (angle, distance) => {
+      if (!gba || !isRunning) return;
+      const newKeys = new Set();
+      const deadzone = 0.2;
+
+      if (distance > deadzone) {
+        const deg = (angle * 180 / Math.PI + 360) % 360;
+        if (deg < 22.5 || deg > 337.5) { newKeys.add('ArrowRight'); }
+        else if (deg < 67.5)   { newKeys.add('ArrowRight'); newKeys.add('ArrowDown'); }
+        else if (deg < 112.5)  { newKeys.add('ArrowDown'); }
+        else if (deg < 157.5)  { newKeys.add('ArrowDown'); newKeys.add('ArrowLeft'); }
+        else if (deg < 202.5)  { newKeys.add('ArrowLeft'); }
+        else if (deg < 247.5)  { newKeys.add('ArrowLeft'); newKeys.add('ArrowUp'); }
+        else if (deg < 292.5)  { newKeys.add('ArrowUp'); }
+        else if (deg < 337.5)  { newKeys.add('ArrowUp'); newKeys.add('ArrowRight'); }
+      }
+
+      activeKeys.forEach(k => { if (!newKeys.has(k)) gba.keyUp(KEY_MAP[k]); });
+      newKeys.forEach(k => { if (!activeKeys.has(k)) gba.keyDown(KEY_MAP[k]); });
+      activeKeys = newKeys;
+    };
+
+    const handleJoystick = (e) => {
+      if (!isDragging) return;
+      const rect = base.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = e.clientX - centerX;
+      const dy = e.clientY - centerY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const angle = Math.atan2(dy, dx);
+      
+      const maxRadius = rect.width / 2;
+      const clampedDist = Math.min(dist, maxRadius);
+      const moveX = Math.cos(angle) * clampedDist;
+      const moveY = Math.sin(angle) * clampedDist;
+
+      knob.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      updateJoystickInput(angle, clampedDist / maxRadius);
+    };
+
+    base.addEventListener('pointerdown', (e) => {
+      const shell = document.getElementById('gba-shell');
+      if (!document.fullscreenElement || !shell.classList.contains('mode-joystick')) return;
+      isDragging = true;
+      base.setPointerCapture(e.pointerId);
+      handleJoystick(e);
+      if (navigator.vibrate) navigator.vibrate(15);
+    });
+
+    base.addEventListener('pointermove', handleJoystick);
+    
+    const stopJoystick = () => {
+      isDragging = false;
+      knob.style.transform = `translate(0, 0)`;
+      activeKeys.forEach(k => gba.keyUp(KEY_MAP[k]));
+      activeKeys.clear();
+    };
+
+    base.addEventListener('pointerup', stopJoystick);
+    base.addEventListener('pointercancel', stopJoystick);
+
+    window.oncontextmenu = (e) => { e.preventDefault(); e.stopPropagation(); return false; };
   }
 
   // ─── ROM INPUT & DRAG DROP ───────────────────────────────────────
