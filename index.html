@@ -1338,30 +1338,59 @@
   }
 
   async function saveState(slotNum) {
-    if (!gba || !isRunning) return;
-    const stateObject = gba.freeze(); 
-    const stateBlob = Serializer.serialize(stateObject);
-    const stateBase64 = await blobToBase64(stateBlob);
-    localStorage.setItem(getSlotKey(slotNum), JSON.stringify({ timestamp: new Date().toISOString(), state: stateBase64 }));
-    renderSaveSlots();
-    showToast(`✓ Saved State ${slotNum}`, 'success');
+    if (!gba || !isRunning) {
+      showToast('No game running.', 'error'); 
+      return; 
+    }
+    try {
+      const stateObject = gba.freeze(); 
+      const stateBlob = Serializer.serialize(stateObject);
+      const stateBase64 = await blobToBase64(stateBlob);
+      localStorage.setItem(getSlotKey(slotNum), JSON.stringify({ 
+        timestamp: new Date().toISOString(), 
+        state: stateBase64 
+      }));
+      renderSaveSlots();
+      showToast(`✓ Saved State ${slotNum}`, 'success');
+    } catch(e) {
+      console.error('[PokePlay] Save state failed:', e);
+      showToast('Save failed.', 'error');
+    }
   }
 
   function loadState(slotNum) {
+    if (!gba || !isRunning) {
+      showToast('Start a game first.', 'error'); 
+      return; 
+    }
     const raw = localStorage.getItem(getSlotKey(slotNum));
-    if (!raw) return;
-    const payload = JSON.parse(raw);
-    Serializer.deserialize(base64ToBlob(payload.state), (stateObject) => {
-      gba.cpu.defrost(stateObject.cpu);
-      gba.mmu.defrost(stateObject.mmu);
-      gba.audio.defrost(stateObject.audio);
-      gba.video.defrost(stateObject.video);
-      gba.io.defrost(stateObject.io);
-      gba.irq.defrost(stateObject.irq);
-      gba.irq.pollNextEvent();
-      gba.seenFrame = false;
-      showToast(`◎ Loaded Slot ${slotNum}`, 'success');
-    });
+    if (!raw) {
+       showToast('No save in this slot.', 'error');
+       return;
+    }
+    try {
+      const payload = JSON.parse(raw);
+      Serializer.deserialize(base64ToBlob(payload.state), (stateObject) => {
+        try {
+          gba.cpu.defrost(stateObject.cpu);
+          gba.mmu.defrost(stateObject.mmu);
+          gba.audio.defrost(stateObject.audio);
+          gba.video.defrost(stateObject.video);
+          gba.io.defrost(stateObject.io);
+          gba.irq.defrost(stateObject.irq);
+          gba.irq.pollNextEvent();
+          gba.seenFrame = false;
+          showToast(`◎ Loaded Slot ${slotNum}`, 'success');
+          setStatus('State restored', 'running');
+        } catch(err) {
+          console.error('[PokePlay] Defrost failed:', err);
+          showToast('Failed to apply state.', 'error');
+        }
+      });
+    } catch(e) {
+      console.error('[PokePlay] Load state failed:', e);
+      showToast('Load failed.', 'error');
+    }
   }
 
   function deleteState(slotNum) {
