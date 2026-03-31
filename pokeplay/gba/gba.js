@@ -79,6 +79,14 @@ GameBoyAdvance.prototype.setCanvas = function(canvas) {
 	this.setCanvasDirect(canvas);
 };
 
+GameBoyAdvance.prototype.keyDown = function(key) {
+	this.keypad.keyDown(key);
+};
+
+GameBoyAdvance.prototype.keyUp = function(key) {
+	this.keypad.keyUp(key);
+};
+
 GameBoyAdvance.prototype.setCanvasDirect = function(canvas) {
 	this.context = canvas.getContext('2d');
 	this.video.setBacking(this.context);
