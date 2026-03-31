@@ -8,7 +8,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
   <style>
     /* ─── RESET & BASE ─────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { 
+      box-sizing: border-box; margin: 0; padding: 0; 
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     :root {
       --bg:          #080c14;
@@ -822,7 +828,6 @@
     }
 
     /* ─── NEW PORTRAIT FULLSCREEN MODE ─────────────────────────────────── */
-    /* When the shell itself is fullscreen */
     .gba-shell:fullscreen {
       width: 100vw;
       height: 100vh;
@@ -834,16 +839,14 @@
       border-radius: 0;
     }
 
-    /* Portrait: 50/50 Split */
     @media (orientation: portrait) {
       .gba-shell:fullscreen {
         justify-content: space-between;
       }
 
-      /* Portrait Grid Layout: Android Style */
       .gba-shell:fullscreen .gba-controls {
         height: 50vh;
-        background: #1a1a2e; /* Darker slate for contrast */
+        background: #1a1a2e;
         border-top: 2px solid #333;
         padding: 2vh 5vw;
         margin-top: 0;
@@ -858,14 +861,13 @@
         align-items: center;
       }
 
-      /* Shoulders Row */
       .gba-shell:fullscreen .center-cluster {
         grid-area: shoulders;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        transform: none; /* Reset desktop scale */
+        transform: none;
         width: 100%;
       }
 
@@ -888,19 +890,42 @@
         justify-content: center;
       }
 
-      /* D-Pad Area */
       .gba-shell:fullscreen .dpad {
         grid-area: dpad;
         justify-self: center;
-        transform: scale(1.4);
+        width: 140px;
+        height: 140px;
+        background: rgba(255,255,255,0.05);
+        border: 2px solid rgba(255,255,255,0.2);
+        border-radius: 50%;
+        position: relative;
+        transform: none;
         margin-left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      /* Actions Area (Diagonal A/B) */
+      .gba-shell:fullscreen .dpad-btn,
+      .gba-shell:fullscreen .dpad-center { display: none; }
+
+      .gba-shell:fullscreen .joystick-knob {
+        display: block !important;
+        width: 60px;
+        height: 60px;
+        background: radial-gradient(circle at 30% 30%, #333, #000);
+        border: 2px solid #555;
+        border-radius: 50%;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        position: absolute;
+        pointer-events: none;
+        transition: transform 0.05s linear;
+      }
+
       .gba-shell:fullscreen .action-btns {
         grid-area: actions;
         justify-self: center;
-        display: block; /* Use block for absolute positioning within */
+        display: block;
         width: 140px;
         height: 140px;
         position: relative;
@@ -928,7 +953,6 @@
         background: radial-gradient(circle at 30% 30%, #4d4dff, #0000b3);
       }
 
-      /* Meta Row (Start/Select) */
       .gba-shell:fullscreen .start-select {
         grid-area: meta;
         display: flex;
@@ -946,16 +970,13 @@
         border-radius: 15px;
       }
 
-      /* Hide bezel labels and speaker for maximum area */
       .gba-shell:fullscreen .screen-label { display: none; }
       
-      /* PERFORMANCE: Disable heavy GPU filters in mobile fullscreen */
       .gba-shell:fullscreen .scanlines,
       .gba-shell:fullscreen .screen-glow { 
         display: none !important; 
       }
       
-      /* Ensure canvas fills screen but stays crisp */
       .gba-shell:fullscreen canvas { 
         image-rendering: pixelated; 
         image-rendering: -webkit-optimize-contrast;
@@ -963,7 +984,6 @@
       }
     }
 
-    /* Landscape: Immersive Fullscreen */
     @media (orientation: landscape) {
       .gba-shell:fullscreen .screen-bezel {
         flex: 1;
@@ -984,40 +1004,6 @@
         border-radius: 0;
       }
       .gba-shell:fullscreen .gba-controls { display: none; }
-    }
-    /* ─── RESPONSIVE ────────────────────────────────────────────────── */
-    @media (max-width: 1200px) {
-      .app-container {
-        flex-direction: column;
-        align-items: center;
-        padding: 2rem 1rem;
-      }
-      .sidebar {
-        max-width: 600px;
-        order: 2;
-      }
-      .emulator-shell {
-        order: 1;
-        margin-bottom: 2rem;
-        max-width: 600px;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .dpad-container {
-        transform: scale(0.8);
-      }
-      .action-btns {
-        transform: scale(0.8);
-      }
-      .shell-footer {
-        padding: 1rem;
-      }
-      .slot-actions {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-      header h1 { font-size: 1.2rem; }
     }
   </style>
 </head>
@@ -1062,8 +1048,9 @@
       <!-- GBA Controls Row -->
       <div class="gba-controls">
 
-        <!-- D-Pad -->
-        <div class="dpad">
+        <!-- D-Pad / Joystick -->
+        <div class="dpad" id="joystick-base">
+          <div class="joystick-knob" id="joystick-knob" style="display:none"></div>
           <div class="dpad-btn dpad-up"    data-key="ArrowUp"    id="dp-up">▲</div>
           <div class="dpad-btn dpad-down"  data-key="ArrowDown"  id="dp-down">▼</div>
           <div class="dpad-btn dpad-left"  data-key="ArrowLeft"  id="dp-left">◀</div>
@@ -1182,53 +1169,25 @@
 <script src="pokeplay/gba/gba.js"></script>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════════
-   PokePlay — Main Application Logic
-   
-   ARCHITECTURE NOTES (for tech reviewer):
-   ─────────────────────────────────────────────────────────────────
-   • All emulation is done client-side via GBA.js (MIT licensed)
-   • ROM files are read via FileReader as ArrayBuffer — never sent
-     to any server. They live only in memory.
-   • Save states are serialized to base64 and stored in localStorage
-     under keys: pokeplay_save_slot_{1|2|3}
-   • Keyboard input is mapped via keydown/keyup listeners and 
-     forwarded to gba.keyDown(key) / gba.keyUp(key)
-   • On-screen buttons use pointerdown/pointerup to support both
-     mouse and touch simultaneously
-   • Speed is set via gba.turbo (multiplier on emulation ticks)
-   ═══════════════════════════════════════════════════════════════════ */
-
-  // ─── STATE ──────────────────────────────────────────────────────
-  // Alias GBA to GameBoyAdvance as expected by the script
   window.GBA = typeof GameBoyAdvance !== 'undefined' ? GameBoyAdvance : undefined;
-  let gba        = null;   // GBA.js instance
-  let romBuffer  = null;   // ArrayBuffer of loaded ROM
-  let romName    = '';     // Display name of loaded ROM
-  let biosBuffer = null;   // ArrayBuffer of loaded BIOS
+  let gba        = null;
+  let romBuffer  = null;
+  let romName    = '';
+  let biosBuffer = null;
   let isRunning  = false;
   let isPaused   = false;
   let currentSpeed = 1;
 
-  // GBA.js key constants (matches GBA.js source)
   const KEY_MAP = {
     'ArrowRight': 4,  'ArrowLeft': 5,  'ArrowUp': 6,  'ArrowDown': 7,
-    'z': 0,           // A
-    'x': 1,           // B
-    'Backspace': 2,   // Select
-    'Enter': 3,       // Start
-    'a': 8,           // L
-    's': 9,           // R
+    'z': 0, 'x': 1, 'Backspace': 2, 'Enter': 3, 'a': 8, 's': 9,
   };
 
-  // ─── INIT ────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
-    // Fetch HLE bios.bin
     fetch('pokeplay/gba/bios.bin')
       .then(res => res.arrayBuffer())
       .then(buf => {
         biosBuffer = buf;
-        // After BIOS, fetch default ROM for faster testing
         const defaultRom = 'Pokemon - FireRed Version (USA, Europe) (Rev 1).gba';
         return fetch(defaultRom);
       })
@@ -1236,7 +1195,6 @@
         if (!res) return;
         return res.arrayBuffer().then(buf => {
           loadRomFromBuffer(buf, 'Pokemon - FireRed Version (USA, Europe) (Rev 1).gba');
-          // Start the game automatically
           setTimeout(startGame, 1000);
         });
       })
@@ -1247,73 +1205,30 @@
     initKeyboard();
     initOnScreenControls();
     initRomInput();
-
-    // Check if GBA.js is loaded
-    if (typeof GBA === 'undefined') {
-      showToast('⚠ GBA.js not found — see setup instructions', 'error', 5000);
-      setStatus('GBA.js not loaded — add gba/gba.js', 'error');
-    }
   });
 
-  // ─── GBA.js SETUP ───────────────────────────────────────────────
-  /**
-   * Initializes the GBA.js emulator instance.
-   * Called once before first ROM load.
-   * 
-   * @returns {boolean} true if init succeeded
-   */
   function initGBA() {
-    if (typeof GBA === 'undefined') {
-      showToast('GBA.js not loaded. See setup instructions.', 'error');
-      return false;
-    }
-
+    if (typeof GBA === 'undefined') return false;
     try {
       const canvas = document.getElementById('gba-canvas');
       gba = new GBA();
       gba.setCanvas(canvas);
-      // Pass the loaded BIOS buffer, or a dummy if it failed
       gba.setBios(biosBuffer || new ArrayBuffer(16384));
-      gba.logLevel = GBA.LOG_ERROR; // Suppress verbose logs
+      gba.logLevel = GBA.LOG_ERROR;
       return true;
-    } catch (e) {
-      console.error('[PokePlay] GBA init failed:', e);
-      setStatus('Emulator init failed: ' + e.message, 'error');
-      return false;
-    }
+    } catch (e) { return false; }
   }
 
-  // ─── ROM LOADING ─────────────────────────────────────────────────
-  /**
-   * Handles ROM file selection. Reads file as ArrayBuffer,
-   * stores it in module-level romBuffer for later use.
-   * ROM never leaves the browser — no network requests made.
-   * 
-   * @param {File} file - The .gba file selected by user
-   */
   function loadRomFile(file) {
     if (!file) return;
-    if (!file.name.match(/\.(gba|gb|gbc)$/i)) {
-      showToast('Invalid file type. Use a .gba file.', 'error');
-      return;
-    }
-
     const reader = new FileReader();
-    reader.onload = (e) => {
-      loadRomFromBuffer(e.target.result, file.name);
-    };
-    reader.onerror = () => showToast('Failed to read ROM file.', 'error');
+    reader.onload = (e) => loadRomFromBuffer(e.target.result, file.name);
     reader.readAsArrayBuffer(file);
   }
 
-  /**
-   * Helper to load ROM from ArrayBuffer and update UI
-   */
   function loadRomFromBuffer(buffer, name) {
     romBuffer = buffer;
     romName = name;
-
-    // Update UI
     document.getElementById('rom-label').style.display = 'none';
     document.getElementById('rom-name').style.display = 'block';
     document.getElementById('rom-name').textContent = '📦 ' + name;
@@ -1323,199 +1238,94 @@
     showToast('ROM loaded: ' + name, 'success');
   }
 
-  /**
-   * Starts the emulator with the loaded ROM buffer.
-   * Hides the splash screen and begins emulation.
-   */
   function startGame() {
     if (!romBuffer) return;
-
-    // Stop any running instance
-    if (gba) {
-      gba.pause();
-      gba = null;
-    }
-
+    if (gba) { gba.pause(); gba = null; }
     if (!initGBA()) return;
-
     try {
       gba.setRom(romBuffer);
       gba.runStable();
       isRunning = true;
       isPaused = false;
-
-      // Hide splash, show canvas
       document.getElementById('screen-splash').classList.add('hidden');
-
-      // Enable controls
-      ['btn-pause','btn-reset','btn-fs'].forEach(id => {
-        document.getElementById(id).disabled = false;
-      });
-
+      ['btn-pause','btn-reset','btn-fs'].forEach(id => document.getElementById(id).disabled = false);
       setStatus('Running: ' + romName, 'running');
-      // Apply current speed to new GBA instance
       if (gba) gba.multiplier = currentSpeed; 
-      renderSaveSlots(); // Refresh slots for the current game
+      renderSaveSlots();
       showToast('▶ Game started!', 'success');
-    } catch(e) {
-      console.error('[PokePlay] ROM load failed:', e);
-      setStatus('Failed to start ROM: ' + e.message, 'error');
-      showToast('Could not start game. Check ROM file.', 'error');
-    }
+    } catch(e) { showToast('Could not start game.', 'error'); }
   }
 
-  // ─── GAME CONTROLS ───────────────────────────────────────────────
-  /**
-   * Toggles pause/resume state of the emulator.
-   * Updates button label and status bar accordingly.
-   */
   function togglePause() {
     if (!gba || !isRunning) return;
     const btn = document.getElementById('btn-pause');
-
-    if (isPaused) {
-      gba.runStable();
-      isPaused = false;
-      btn.textContent = '⏸ PAUSE';
-      btn.classList.remove('active');
-      setStatus('Running: ' + romName, 'running');
-    } else {
-      gba.pause();
-      isPaused = true;
-      btn.textContent = '▶ RESUME';
-      btn.classList.add('active');
-      setStatus('Paused', 'paused');
-    }
+    if (isPaused) { gba.runStable(); isPaused = false; btn.textContent = '⏸ PAUSE'; btn.classList.remove('active'); setStatus('Running: ' + romName, 'running'); }
+    else { gba.pause(); isPaused = true; btn.textContent = '▶ RESUME'; btn.classList.add('active'); setStatus('Paused', 'paused'); }
   }
 
-  /**
-   * Resets the emulator and restarts the current ROM from the beginning.
-   */
   function resetGame() {
     if (!gba || !romBuffer) return;
-    gba.pause();
-    gba.reset();
-    gba.loadRomFromBuffer(romBuffer);
-    gba.runStable();
+    gba.pause(); gba.reset(); gba.loadRomFromBuffer(romBuffer); gba.runStable();
     isPaused = false;
     document.getElementById('btn-pause').textContent = '⏸ PAUSE';
     document.getElementById('btn-pause').classList.remove('active');
     setStatus('Running: ' + romName, 'running');
-    showToast('Game reset.', 'info');
   }
 
-  /**
-   * Toggles browser Fullscreen API on the screen element.
-   * Falls back gracefully if not supported.
-   */
   function toggleFullscreen() {
     const shell = document.getElementById('gba-shell');
-    const screenOnly = document.getElementById('screen-wrap');
-    
     if (!document.fullscreenElement) {
-      // If mobile/portrait, we want the SHELL (with controls) to go fullscreen
-      // If desktop or landscape, we might want just the screen, but targeting the shell is more flexible.
-      const target = (window.innerHeight > window.innerWidth) ? shell : shell;
-      
-      if (target.requestFullscreen) {
-        target.requestFullscreen();
-      } else if (target.webkitRequestFullscreen) {
-        target.webkitRequestFullscreen();
-      } else if (target.mozRequestFullScreen) {
-        target.mozRequestFullScreen();
-      }
+      if (shell.requestFullscreen) shell.requestFullscreen();
+      else if (shell.webkitRequestFullscreen) shell.webkitRequestFullscreen();
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      }
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     }
   }
 
-  /**
-   * Sets emulation speed multiplier.
-   * GBA.js supports turbo mode via internal tick multiplier.
-   * 
-   * @param {number} speed - Multiplier: 1, 2, or 4
-   */
   function setSpeed(speed) {
     currentSpeed = speed;
-
-    // Update speed buttons
-    document.querySelectorAll('.speed-btn').forEach(btn => {
-      btn.classList.toggle('active', parseInt(btn.dataset.speed) === speed);
-    });
-
-    if (!gba) return;
-    // GBA.js turbo: run N frames per tick via our new multiplier
-    gba.multiplier = speed;
+    document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.speed) === speed));
+    if (gba) gba.multiplier = speed;
   }
 
-  // ─── SAVE STATES ─────────────────────────────────────────────────
   const SLOT_BASE_PREFIX = 'pokeplay_save_slot_';
   const NUM_SLOTS = 3;
 
-  /**
-   * Helper: Converts a Blob to a Base64 string for localStorage.
-   */
   function blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
   }
 
-  /**
-   * Helper: Converts a Base64 string back to an ArrayBuffer/Blob.
-   */
   function base64ToBlob(base64) {
     const binaryString = atob(base64);
     const len = binaryString.length;
     const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
+    for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
     return new Blob([bytes], { type: 'application/octet-stream' });
   }
 
-  /**
-   * Generates a ROM-specific key for localStorage.
-   * This ensures save states are "synced" with the current game.
-   */
   function getSlotKey(slotNum) {
     const code = (gba && gba.mmu && gba.mmu.cart) ? gba.mmu.cart.code : 'GLOBAL';
     return `${SLOT_BASE_PREFIX}${code}_${slotNum}`;
   }
 
-  /**
-   * Renders the 3 save slots into the sidebar.
-   * Each slot displays its timestamp if data exists,
-   * along with Save / Load / Delete action buttons.
-   */
   function renderSaveSlots() {
     const container = document.getElementById('save-slots');
     container.innerHTML = '';
-
     for (let i = 1; i <= NUM_SLOTS; i++) {
       const key = getSlotKey(i);
       const raw = localStorage.getItem(key);
-      let data = null;
-      try { data = raw ? JSON.parse(raw) : null; } catch(e) { data = null; }
-
+      let data = null; try { data = raw ? JSON.parse(raw) : null; } catch(e) {}
       const slot = document.createElement('div');
       slot.className = 'save-slot' + (data ? ' has-data' : '');
       slot.innerHTML = `
         <div class="slot-info">
           <div class="slot-name">SLOT ${i}</div>
-          ${data
-            ? `<div class="slot-time">${new Date(data.timestamp).toLocaleString()}</div>`
-            : `<div class="slot-empty">— empty —</div>`
-          }
+          ${data ? `<div class="slot-time">${new Date(data.timestamp).toLocaleString()}</div>` : `<div class="slot-empty">— empty —</div>`}
         </div>
         <div class="slot-actions">
           <button class="slot-btn slot-btn-save" onclick="saveState(${i})" ${!isRunning ? 'disabled' : ''}>SAVE</button>
@@ -1527,89 +1337,40 @@
     }
   }
 
-  /**
-   * Saves the current GBA emulator state to localStorage slot N.
-   * Uses Serializer to handle binary buffers correctly.
-   */
   async function saveState(slotNum) {
-    if (!gba || !isRunning) {
-      showToast('No game running.', 'error'); return;
-    }
-
-    try {
-      const stateObject = gba.freeze(); 
-      const stateBlob = Serializer.serialize(stateObject);
-      const stateBase64 = await blobToBase64(stateBlob);
-
-      const payload = {
-        timestamp: new Date().toISOString(),
-        label: 'Slot ' + slotNum,
-        state: stateBase64
-      };
-      localStorage.setItem(getSlotKey(slotNum), JSON.stringify(payload));
-      renderSaveSlots();
-      showToast(`✓ Saved State ${slotNum}`, 'success');
-    } catch(e) {
-      console.error('[PokePlay] Save state failed:', e);
-      showToast('Save failed.', 'error');
-    }
+    if (!gba || !isRunning) return;
+    const stateObject = gba.freeze(); 
+    const stateBlob = Serializer.serialize(stateObject);
+    const stateBase64 = await blobToBase64(stateBlob);
+    localStorage.setItem(getSlotKey(slotNum), JSON.stringify({ timestamp: new Date().toISOString(), state: stateBase64 }));
+    renderSaveSlots();
+    showToast(`✓ Saved State ${slotNum}`, 'success');
   }
 
-  /**
-   * Loads a previously saved GBA state from localStorage slot N.
-   * Uses Serializer to restore binary buffers.
-   */
   function loadState(slotNum) {
-    const key = getSlotKey(slotNum);
-    const raw = localStorage.getItem(key);
-    if (!raw) { showToast('No save in this slot.', 'error'); return; }
-
-    try {
-      const payload = JSON.parse(raw);
-      const stateBlob = base64ToBlob(payload.state);
-      
-      Serializer.deserialize(stateBlob, (stateObject) => {
-        try {
-          gba.cpu.defrost(stateObject.cpu);
-          gba.mmu.defrost(stateObject.mmu);
-          gba.audio.defrost(stateObject.audio);
-          gba.video.defrost(stateObject.video);
-          gba.io.defrost(stateObject.io);
-          gba.irq.defrost(stateObject.irq);
-          gba.irq.pollNextEvent();
-          gba.seenFrame = false;
-          showToast(`◎ Loaded Slot ${slotNum}`, 'success');
-          setStatus('State restored', 'running');
-        } catch(err) {
-          console.error('[PokePlay] Defrost failed:', err);
-          showToast('Failed to apply state.', 'error');
-        }
-      });
-    } catch(e) {
-      console.error('[PokePlay] Load state failed:', e);
-      showToast('Load failed: ' + e.message, 'error');
-    }
+    const raw = localStorage.getItem(getSlotKey(slotNum));
+    if (!raw) return;
+    const payload = JSON.parse(raw);
+    Serializer.deserialize(base64ToBlob(payload.state), (stateObject) => {
+      gba.cpu.defrost(stateObject.cpu);
+      gba.mmu.defrost(stateObject.mmu);
+      gba.audio.defrost(stateObject.audio);
+      gba.video.defrost(stateObject.video);
+      gba.io.defrost(stateObject.io);
+      gba.irq.defrost(stateObject.irq);
+      gba.irq.pollNextEvent();
+      gba.seenFrame = false;
+      showToast(`◎ Loaded Slot ${slotNum}`, 'success');
+    });
   }
 
-  /**
-   * Deletes save state data for the given slot from localStorage.
-   * 
-   * @param {number} slotNum - Slot index 1–3
-   */
   function deleteState(slotNum) {
     localStorage.removeItem(getSlotKey(slotNum));
     renderSaveSlots();
-    showToast(`Slot ${slotNum} cleared.`, 'info');
   }
 
-  // ─── KEYBOARD INPUT ───────────────────────────────────────────────
-  /**
-   * Registers global keyboard listeners and maps them to GBA.js input.
-   * Prevents default browser behavior for arrow keys (page scroll).
-   */
   function initKeyboard() {
     const preventKeys = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Backspace'];
-
     document.addEventListener('keydown', (e) => {
       if (preventKeys.includes(e.key)) e.preventDefault();
       const key = KEY_MAP[e.key];
