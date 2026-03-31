@@ -120,7 +120,8 @@ Serializer = {
 				break;
 			case Serializer.TAG_BLOB:
 				var size = view.getUint32(pointer.advance(4), true);
-				body = view.buffer.slice(pointer.advance(size), pointer.advance(0));
+				var start = pointer.advance(size);
+				body = view.buffer.slice(start, start + size);
 				break;
 			case Serializer.TAG_BOOLEAN:
 				body = !!view.getUint8(pointer.advance(1));
