@@ -948,6 +948,19 @@
 
       /* Hide bezel labels and speaker for maximum area */
       .gba-shell:fullscreen .screen-label { display: none; }
+      
+      /* PERFORMANCE: Disable heavy GPU filters in mobile fullscreen */
+      .gba-shell:fullscreen .scanlines,
+      .gba-shell:fullscreen .screen-glow { 
+        display: none !important; 
+      }
+      
+      /* Ensure canvas fills screen but stays crisp */
+      .gba-shell:fullscreen canvas { 
+        image-rendering: pixelated; 
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
     }
 
     /* Landscape: Immersive Fullscreen */
