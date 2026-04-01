@@ -1060,6 +1060,55 @@
         border: 1px solid rgba(255,255,255,0.2); cursor: pointer;
         margin-top: 8px;
       }
+
+      /* Control Editing HUD */
+      .edit-ui-hud {
+        position: absolute !important; inset: 0 !important; z-index: 60 !important;
+        display: flex !important; flex-direction: column !important;
+        align-items: center !important; justify-content: flex-start !important;
+        background: rgba(0,0,0,0.85) !important;
+        backdrop-filter: blur(4px);
+        padding: 20px !important;
+        font-family: var(--pixel); color: #fff;
+        pointer-events: none; /* Let clicks pass through except on HUD controls */
+      }
+      .edit-ui-hud.hidden { display: none !important; }
+      .edit-ui-hud > * { pointer-events: auto; } /* Re-enable for panel content */
+      
+      .edit-ui-panel {
+        background: var(--surface);
+        padding: 16px; border-radius: 16px; border: 2px solid var(--accent);
+        text-align: center; color: var(--text);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      }
+      .edit-btn-save {
+        padding: 12px 24px; border-radius: 8px; background: var(--green);
+        color: #fff; border: none; cursor: pointer; font-family: var(--pixel); font-size: 10px;
+      }
+      .edit-btn-reset {
+        padding: 12px 24px; border-radius: 8px; background: rgba(0,0,0,0.1);
+        color: var(--red); border: 1px solid var(--red); cursor: pointer; font-family: var(--pixel); font-size: 10px;
+      }
+
+      /* Edit Mode Interaction Overrides */
+      body.edit-mode .screen-bezel { display: none !important; }
+      body.edit-mode .shoulder-btn,
+      body.edit-mode .dpad-col,
+      body.edit-mode .action-btn,
+      body.edit-mode .meta-btn {
+        touch-action: none !important;
+        cursor: grab;
+      }
+      body.edit-mode .dpad-col::after {
+        content: ''; position: absolute; inset: -10px; 
+        border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px;
+        pointer-events: none;
+      }
+      
+      .edit-target-active {
+        box-shadow: 0 0 0 4px var(--accent), 0 0 20px var(--accent) !important;
+        z-index: 100;
+      }
       
       #gba-shell { 
         width: 100vw !important; height: 100svh !important; 
@@ -1421,6 +1470,28 @@
                 <button class="rom-start-btn" id="mobile-start-btn" onclick="startGame()">▶ START GAME</button>
                 <button class="rom-back-btn" onclick="switchView('view-home')">⌂ BACK HOME</button>
               </div>
+              
+              <!-- UI Edit Overlay -->
+              <div class="edit-ui-hud hidden" id="edit-ui-hud">
+                <div class="edit-ui-panel">
+                  <div style="font-size:14px; margin-bottom:12px; color:var(--text);">⚙️ UI EDITOR</div>
+                  
+                  <div id="edit-target-label" style="font-size:9px; color:var(--text-dim); margin-bottom:12px;">
+                    Select an element to resize,<br/>or drag it anywhere.
+                  </div>
+                  
+                  <div style="margin-bottom:16px; display:flex; gap:10px; align-items:center;">
+                    <span style="font-size:10px;">Size</span>
+                    <input type="range" id="edit-scale-slider" min="0.5" max="2.0" step="0.05" value="1.0" style="flex:1" oninput="updateActiveNodeScale(this.value)" />
+                  </div>
+
+                  <div style="display:flex; justify-content:center; gap:10px;">
+                    <button class="edit-btn-reset" onclick="resetCustomUI()">RESET</button>
+                    <button class="edit-btn-save" onclick="toggleEditMode()">SAVE & EXIT</button>
+                  </div>
+                </div>
+              </div>
+
               <div class="screen-bezel">
                 <div class="screen-wrap">
                   <div class="screen-label">POKEPLAY ARCADE <span>// 32-BIT GBA CORE</span></div>
@@ -1468,7 +1539,10 @@
                 <!-- Center: Meta -->
                 <div class="meta-col">
                   <div class="meta-btn" data-key="Backspace" id="btn-sel">SELECT</div>
-                  <div class="meta-btn" id="btn-mode" onclick="toggleControlLayout()">🕹️ JOY</div>
+                  <div style="display:flex; gap:10px; width:100%; justify-content:center;">
+                    <div class="meta-btn" id="btn-mode" onclick="toggleControlLayout()">🕹️ JOY</div>
+                    <div class="meta-btn" id="btn-edit" onclick="toggleEditMode()" style="background:#2a3b5a; color:var(--amber)">⚙️ EDIT</div>
+                  </div>
                   <div class="meta-btn" data-key="Enter"     id="btn-sta">START</div>
                 </div>
 
@@ -1734,7 +1808,9 @@
     renderSaveSlots();
     initDragDrop();
     initKeyboard();
+    initCustomUI();
     initOnScreenControls();
+    initEditorDragEngine();
     initRomInput();
     
     const savedLayout = localStorage.getItem('pokeplay_control_mode') || 'mode-dpad';
@@ -2078,6 +2154,142 @@
     }
   }
 
+  // ─── UI CUSTOMIZATION ENGINE (DRAG & DROP) ───────────────────────
+  let isEditMode = false;
+  let activeEditNode = null;
+  let customLayoutData = {};
+  
+  function initCustomUI() {
+    const saved = localStorage.getItem('pokeplay_custom_ui');
+    if (saved) {
+      try { customLayoutData = JSON.parse(saved); applyCustomUI(); } catch(e) {}
+    }
+  }
+
+  function applyCustomUI() {
+    for (const [id, data] of Object.entries(customLayoutData)) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.transform = `translate(${data.x}px, ${data.y}px) scale(${data.scale})`;
+        el.dataset.scale = data.scale; el.dataset.x = data.x; el.dataset.y = data.y;
+      }
+    }
+  }
+
+  function toggleEditMode() {
+    isEditMode = !isEditMode;
+    const hud = document.getElementById('edit-ui-hud');
+    const btnEdit = document.getElementById('btn-edit');
+    
+    if (isEditMode) {
+      document.body.classList.add('edit-mode');
+      hud.classList.remove('hidden');
+      if (gba && isRunning && !isPaused) { gba.pause(); isPaused = true; document.getElementById('btn-pause').textContent = '▶ RESUME'; document.getElementById('btn-pause').classList.add('active'); }
+      
+      btnEdit.textContent = '💾 SAVE'; btnEdit.style.background = 'var(--green)'; btnEdit.style.color = '#fff';
+      document.getElementById('btn-mode').style.display = 'none'; // hide normal buttons during edit
+      
+    } else {
+      document.body.classList.remove('edit-mode');
+      hud.classList.add('hidden');
+      if (activeEditNode) activeEditNode.classList.remove('edit-target-active');
+      activeEditNode = null;
+      
+      btnEdit.textContent = '⚙️ EDIT'; btnEdit.style.background = '#2a3b5a'; btnEdit.style.color = 'var(--amber)';
+      document.getElementById('btn-mode').style.display = 'flex';
+      
+      localStorage.setItem('pokeplay_custom_ui', JSON.stringify(customLayoutData));
+    }
+  }
+
+  function resetCustomUI() {
+    customLayoutData = {};
+    localStorage.removeItem('pokeplay_custom_ui');
+    const nodes = document.querySelectorAll('.shoulder-btn, .dpad-col, .action-btn, .meta-btn');
+    nodes.forEach(el => {
+      el.style.transform = '';
+      delete el.dataset.scale; delete el.dataset.x; delete el.dataset.y;
+      if (el === activeEditNode) el.classList.remove('edit-target-active');
+    });
+    activeEditNode = null;
+    document.getElementById('edit-scale-slider').parentElement.style.display = 'none';
+    document.getElementById('edit-target-label').innerHTML = "Select an element to resize,<br/>or drag it anywhere.";
+  }
+
+  function updateActiveNodeScale(val) {
+    if (!activeEditNode) return;
+    const id = activeEditNode.id || activeEditNode.className.split(' ')[0];
+    if (!customLayoutData[id]) customLayoutData[id] = { x: 0, y: 0, scale: 1.0 };
+    customLayoutData[id].scale = parseFloat(val);
+    activeEditNode.dataset.scale = val;
+    activeEditNode.style.transform = `translate(${customLayoutData[id].x}px, ${customLayoutData[id].y}px) scale(${val})`;
+  }
+
+  function initEditorDragEngine() {
+    // We attach dragging to specific containers
+    const draggableTargets = document.querySelectorAll('.shoulder-btn, .action-btn, .meta-btn:not(#btn-edit), .dpad-col');
+    
+    draggableTargets.forEach(el => {
+      // Create ID if missing (for dpad-col)
+      if (!el.id) el.id = el.classList[0] + "-container";
+
+      let startX, startY;
+      let initialOffsetX = 0, initialOffsetY = 0;
+      let isDraggingNode = false;
+
+      el.addEventListener('pointerdown', (e) => {
+        if (!isEditMode) return;
+        e.preventDefault(); e.stopPropagation();
+        
+        // Select Node
+        if (activeEditNode) activeEditNode.classList.remove('edit-target-active');
+        activeEditNode = el;
+        el.classList.add('edit-target-active');
+        
+        // Update slider UI
+        const currentScale = el.dataset.scale ? parseFloat(el.dataset.scale) : 1.0;
+        const sliderGrp = document.getElementById('edit-scale-slider').parentElement;
+        sliderGrp.style.display = 'flex';
+        document.getElementById('edit-scale-slider').value = currentScale;
+        document.getElementById('edit-target-label').textContent = "Selected: " + (el.textContent.trim().split(' ')[0] || "Directional Pad");
+
+        // Prepare Dragging
+        isDraggingNode = true;
+        startX = e.clientX; startY = e.clientY;
+        initialOffsetX = el.dataset.x ? parseFloat(el.dataset.x) : 0;
+        initialOffsetY = el.dataset.y ? parseFloat(el.dataset.y) : 0;
+        el.setPointerCapture(e.pointerId);
+      });
+
+      el.addEventListener('pointermove', (e) => {
+        if (!isEditMode || !isDraggingNode) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        const newX = initialOffsetX + dx;
+        const newY = initialOffsetY + dy;
+        const scale = el.dataset.scale ? parseFloat(el.dataset.scale) : 1.0;
+        
+        el.style.transform = `translate(${newX}px, ${newY}px) scale(${scale})`;
+        
+        // Save temporary local state
+        el.dataset.x = newX;
+        el.dataset.y = newY;
+        
+        if (!customLayoutData[el.id]) customLayoutData[el.id] = { x: 0, y: 0, scale: 1.0 };
+        customLayoutData[el.id].x = newX;
+        customLayoutData[el.id].y = newY;
+      });
+
+      const stopDrag = (e) => {
+        if (isDraggingNode) { isDraggingNode = false; el.releasePointerCapture(e.pointerId); }
+      };
+      
+      el.addEventListener('pointerup', stopDrag);
+      el.addEventListener('pointercancel', stopDrag);
+    });
+  }
+
   // ─── ON-SCREEN CONTROLS ──────────────────────────────────────────
   /**
    * Wires up all on-screen D-pad and action buttons with pointer events.
@@ -2095,6 +2307,7 @@
       if (!keyCode) return;
 
       btn.addEventListener('pointerdown', (e) => {
+        if (isEditMode) return; // Ignore gameplay presses when in edit mode
         e.preventDefault();
         const shell = document.getElementById('gba-shell');
         const isDpadMode = shell.classList.contains('mode-dpad');
@@ -2168,6 +2381,7 @@
     };
 
     base.addEventListener('pointerdown', (e) => {
+      if (isEditMode) return; // Let the editor drag engine handle pointerdown
       const shell = document.getElementById('gba-shell');
       if (!shell.classList.contains('mode-joystick')) return;
       isDragging = true;
