@@ -17,24 +17,24 @@
     }
 
     :root {
-      --bg:          #080c14;
-      --surface:     #0d1526;
-      --panel:       #111c35;
-      --border:      #1e2f55;
-      --glow:        #e63946;
-      --glow2:       #ffd166;
-      --accent:      #06d6a0;
-      --text:        #c8d8f0;
-      --text-dim:    #5a7098;
-      --btn-face:    #1a2740;
-      --btn-border:  #2a3f6a;
-      --screen-bg:   #0a1220;
-      --screen-glow: #1a4fff;
-      --shell-top:   #1a2845;
-      --shell-bot:   #0f1e38;
-      --red:         #e63946;
-      --amber:       #ffd166;
-      --green:       #06d6a0;
+      --bg:          #fdfbf7;      /* Warm Cream */
+      --surface:     #ffffff;      /* White */
+      --panel:       #fcfcfc;
+      --border:      #e5e0d8;      /* Soft Warm Grey */
+      --glow:        #ff6b6b;      /* Warm Red */
+      --glow2:       #ff9f43;      /* Warm Orange */
+      --accent:      #ff9f43;
+      --text:        #2d3436;      /* Dark Grey */
+      --text-dim:    #636e72;      /* Muted Grey */
+      --btn-face:    #ffffff;
+      --btn-border:  #dcdde1;
+      --screen-bg:   #0a0806;
+      --screen-glow: #ff9f43;
+      --shell-top:   #f7f1e3;      /* Warm Sand */
+      --shell-bot:   #e2ddd5;
+      --red:         #ee5253;
+      --amber:       #ff9f43;
+      --green:       #10ac84;
       --pixel: 'Press Start 2P', monospace;
       --mono: 'Share Tech Mono', monospace;
     }
@@ -52,17 +52,10 @@
       content: '';
       position: fixed; inset: 0; z-index: 0;
       background-image:
-        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
-        radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
-        radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
-        radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 20% 90%, rgba(255,255,255,0.2) 0%, transparent 100%),
-        radial-gradient(1px 1px at 80% 15%, rgba(255,255,255,0.3) 0%, transparent 100%),
-        radial-gradient(1px 1px at 45% 55%, rgba(255,255,255,0.2) 0%, transparent 100%),
-        radial-gradient(1px 1px at 65% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(600px 600px at 20% 50%, rgba(26,79,255,0.06) 0%, transparent 70%),
-        radial-gradient(400px 400px at 80% 20%, rgba(230,57,70,0.05) 0%, transparent 70%);
+        radial-gradient(1px 1px at 10% 20%, rgba(0,0,0,0.05) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 60%, rgba(0,0,0,0.03) 0%, transparent 100%),
+        radial-gradient(600px 600px at 20% 50%, rgba(255,159,67,0.04) 0%, transparent 70%),
+        radial-gradient(400px 400px at 80% 20%, rgba(238,82,83,0.03) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -131,16 +124,180 @@
     .badge-gba { color: var(--amber); border-color: rgba(255,209,102,0.3); background: rgba(255,209,102,0.05); }
     .badge-emu { color: var(--accent); border-color: rgba(6,214,160,0.3); background: rgba(6,214,160,0.05); }
 
-    /* ─── MAIN STAGE ────────────────────────────────────────────────── */
-    .stage {
+    .view {
       flex: 1;
       width: 100%;
       max-width: 1200px;
       padding: 32px 20px;
-      display: grid;
+      display: none;
+      animation: view-fade-in 0.4s ease-out;
+    }
+
+    .view.active { display: grid; }
+    
+    @keyframes view-fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── LANDING PAGE ────────────────────────────────────────────── */
+    #view-home { 
+      grid-template-columns: 1fr;
+      text-align: center;
+      padding-top: 60px;
+    }
+
+    .hero-title {
+      font-family: var(--pixel);
+      font-size: 28px;
+      margin-bottom: 16px;
+      color: var(--text);
+      letter-spacing: 2px;
+    }
+
+    .hero-subtitle {
+      font-size: 16px;
+      color: var(--text-dim);
+      margin-bottom: 48px;
+    }
+
+    .option-grid {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .option-card {
+      width: 320px;
+      padding: 40px 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .option-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(255,159,67,0.15);
+      border-color: var(--accent);
+    }
+
+    .option-icon {
+      font-size: 48px;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    .option-name {
+      font-family: var(--pixel);
+      font-size: 12px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .option-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* ─── LIBRARY CATALOG ─────────────────────────────────────────── */
+    #view-library {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 24px;
+    }
+
+    .library-header {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .game-card {
+      background: var(--surface);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .game-card:hover {
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+      border-color: var(--accent);
+    }
+
+    .game-thumb {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #eee;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+
+    .game-card:hover .game-thumb img { transform: scale(1.1); }
+
+    .game-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      opacity: 0;
+      transition: 0.3s;
+      backdrop-filter: blur(4px);
+    }
+
+    .game-card:hover .game-overlay { opacity: 1; }
+
+    .game-play-btn {
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      font-family: var(--pixel);
+      font-size: 10px;
+      border: none;
+      border-radius: 20px;
+    }
+
+    .game-info {
+      padding: 16px;
+    }
+
+    .game-title {
+      font-family: var(--mono);
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .game-genre {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ─── EMULATOR STAGE ────────────────────────────────────────────── */
+    .stage {
       grid-template-columns: 1fr 320px;
       gap: 28px;
-      align-items: start;
     }
 
     /* ─── GBA SHELL ─────────────────────────────────────────────────── */
@@ -183,13 +340,13 @@
 
     /* ─── SCREEN BEZEL ──────────────────────────────────────────────── */
     .screen-bezel {
-      background: #050910;
+      background: #111;
       border-radius: 12px;
       padding: 16px;
-      border: 2px solid #0a1428;
+      border: 4px solid #222;
       box-shadow:
-        0 0 0 1px rgba(26,79,255,0.15),
-        inset 0 2px 8px rgba(0,0,0,0.8);
+        inset 0 4px 12px rgba(255,255,255,0.1),
+        0 8px 32px rgba(0,0,0,0.2);
       position: relative;
       margin-bottom: 24px;
     }
@@ -805,10 +962,91 @@
     #toast.error   { border-color: var(--red); color: var(--red); }
     #toast.info    { border-color: var(--amber); color: var(--amber); }
 
-    /* Fullscreen */
-    .screen-wrap:-webkit-full-screen { width: 100vw; height: 100vh; }
-    .screen-wrap:-moz-full-screen    { width: 100vw; height: 100vh; }
-    .screen-wrap:fullscreen          { width: 100vw; height: 100vh; }
+    /* ─── FULLSCREEN: SMART MODES ────────────────────────────────────── */
+    
+    /* [PC] Cinema Mode: Maximize the "TV Box" Screen for Desktop */
+    @media screen and (min-width: 1024px) {
+      #gba-shell:fullscreen {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #000 !important;
+        padding: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+      }
+
+      #gba-shell:fullscreen .screen-bezel {
+        width: 96vw !important; /* Expanded horizontal reach */
+        max-width: 1600px !important; 
+        max-height: 94vh !important; /* Utilized more vertical space safely */
+        height: auto !important;
+        aspect-ratio: 3/2;
+        border-width: 50px !important; 
+        border-color: #222 !important;
+        box-shadow: 0 0 100px rgba(0,0,0,0.8), 0 0 40px var(--accent);
+        margin: 0 !important;
+        border-radius: 40px !important;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #gba-shell:fullscreen .gba-controls {
+        display: none !important; /* Controls aren't needed on PC FS because of Keyboard */
+      }
+
+      #gba-shell:fullscreen .screen-wrap {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #gba-shell:fullscreen .screen-label {
+        display: block !important;
+        position: absolute;
+        top: -40px; /* Centered in top bezel */
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0.3;
+        font-size: 14px;
+        margin: 0;
+      }
+    }
+
+    /* [Mobile/Tablet] Half-Half Mode: Preserved */
+    @media screen and (max-width: 1023px) {
+      #gba-shell:fullscreen {
+        background: #fdfbf7 !important;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      #gba-shell:fullscreen .screen-bezel {
+        width: 100% !important;
+        height: 50vh !important;
+        border: none !important;
+        border-radius: 0 !important;
+      }
+
+      #gba-shell:fullscreen .gba-controls {
+        height: 50vh !important;
+        background: #f7f3ed;
+        padding: 2vh 5vw;
+        display: grid;
+      }
+    }
+
+    #gba-shell:fullscreen canvas {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+    }
 
     /* ─── RESPONSIVE ─────────────────────────────────────────────────── */
     @media (max-width: 900px) {
@@ -840,14 +1078,16 @@
     }
 
     @media (orientation: portrait) {
+    /* ─── FULLSCREEN CONTROLS (LIGHT THEME) ────────────────────────── */
+    @media screen {
       .gba-shell:fullscreen {
-        justify-content: space-between;
+        background: #fdfbf7 !important;
       }
 
       .gba-shell:fullscreen .gba-controls {
         height: 50vh;
-        background: #1a1a2e;
-        border-top: 2px solid #333;
+        background: #f7f3ed;
+        border-top: 2px solid var(--border);
         padding: 2vh 5vw;
         margin-top: 0;
         display: grid;
@@ -861,314 +1101,289 @@
         align-items: center;
       }
 
-      .gba-shell:fullscreen .center-cluster {
-        grid-area: shoulders;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        transform: none;
-        width: 100%;
-      }
-
-      .gba-shell:fullscreen .shoulder-btns {
-        display: flex;
-        width: 100%;
-        justify-content: space-between;
-        gap: 20px;
-      }
-
       .gba-shell:fullscreen .shoulder-btn {
-        flex: 1;
-        height: 44px;
-        border-radius: 8px;
-        background: #333;
-        border: 1px solid #444;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background: #fff;
+        border: 1px solid var(--border);
+        color: var(--text);
       }
-
-      /* D-Pad Area -> NOW JOYSTICK BASE */
-      .gba-shell:fullscreen .dpad {
-        grid-area: dpad;
-        justify-self: center;
-        width: 140px;
-        height: 140px;
-        background: rgba(255,255,255,0.05);
-        border: 2px solid rgba(255,255,255,0.2);
-        border-radius: 50%;
-        position: relative;
-        transform: none;
-        margin-left: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        /* CRITICAL: Prevent mobile scrolling while using joystick */
-        touch-action: none;
-      }
-
-      /* Control Mode: DPAD */
-      .gba-shell.mode-dpad:fullscreen .dpad {
-        background: transparent;
-        border: none;
-        border-radius: 0;
-        width: 96px; 
-        height: 96px;
-        display: block;
-        transform: scale(1.45);
-      }
-      .gba-shell.mode-dpad:fullscreen .dpad-btn,
-      .gba-shell.mode-dpad:fullscreen .dpad-center { display: flex; }
-      .gba-shell.mode-dpad:fullscreen .joystick-knob { display: none !important; }
-
-      /* Control Mode: JOYSTICK */
-      .gba-shell.mode-joystick:fullscreen .dpad-btn,
-      .gba-shell.mode-joystick:fullscreen .dpad-center { display: none; }
-      .gba-shell.mode-joystick:fullscreen .joystick-knob { display: block !important; }
 
       .gba-shell:fullscreen .joystick-knob {
-        display: block !important;
-        width: 60px;
-        height: 60px;
-        background: radial-gradient(circle at 30% 30%, #333, #000);
-        border: 2px solid #555;
-        border-radius: 50%;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        position: absolute;
-        pointer-events: none;
-        transition: transform 0.05s linear;
-      }
-
-      .gba-shell:fullscreen .action-btns {
-        grid-area: actions;
-        justify-self: center;
-        display: block;
-        width: 140px;
-        height: 140px;
-        position: relative;
-        transform: none;
-        margin-right: 0;
+        background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+        border: 2px solid var(--border);
       }
 
       .gba-shell:fullscreen .action-btn {
-        position: absolute;
-        width: 65px;
-        height: 65px;
-        font-size: 18px;
-        border-width: 3px;
-      }
-
-      .gba-shell:fullscreen .btn-a {
-        top: 0;
-        right: 0;
-        background: radial-gradient(circle at 30% 30%, #ff4d4d, #b30000);
-      }
-
-      .gba-shell:fullscreen .btn-b {
-        bottom: 10px;
-        left: 0;
-        background: radial-gradient(circle at 30% 30%, #4d4dff, #0000b3);
-      }
-
-      .gba-shell:fullscreen .start-select {
-        grid-area: meta;
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-        width: 100%;
+        border-width: 4px;
+        box-shadow: 0 4px 0 rgba(0,0,0,0.1);
       }
 
       .gba-shell:fullscreen .meta-btn {
-        width: 100px;
-        height: 30px;
-        font-size: 10px;
-        background: #222;
-        border: 1px solid #444;
-        border-radius: 15px;
-      }
-
-      .gba-shell:fullscreen .screen-label { display: none; }
-      
-      .gba-shell:fullscreen .scanlines,
-      .gba-shell:fullscreen .screen-glow { 
-        display: none !important; 
-      }
-      
-      .gba-shell:fullscreen canvas { 
-        image-rendering: pixelated; 
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
+        background: #fff;
+        color: var(--text);
+        border: 1px solid var(--border);
       }
     }
+    }
 
-    @media (orientation: landscape) {
-      .gba-shell:fullscreen .screen-bezel {
-        flex: 1;
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #000;
-      }
-      .gba-shell:fullscreen .screen-wrap {
-        width: 100vw;
-        height: 100vh;
-        max-width: none;
-        max-height: none;
-        border-radius: 0;
-      }
-      .gba-shell:fullscreen .gba-controls { display: none; }
+    /* ─── INSTRUCTIONS MODAL ─────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-content {
+      background: #fff;
+      padding: 32px;
+      border-radius: 20px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .modal-title { font-family: var(--pixel); font-size: 14px; margin-bottom: 24px; color: var(--accent); }
+    .modal-close { margin-top: 24px; padding: 12px; width: 100%; border-radius: 12px; background: var(--text); color: #fff; border: none; font-family: var(--pixel); font-size: 10px; cursor: pointer; }
+
+    .game-thumb {
+      height: 280px;
+      position: relative;
+      overflow: hidden;
+      background: #f0ede8;
+    }
+
+    .game-poster {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 15px;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .game-card:hover .game-poster {
+      transform: scale(1.1);
+    }
+
+    .game-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.3) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 30px 20px;
+      opacity: 0;
+      transition: all 0.4s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .game-card:hover .game-overlay {
+      opacity: 1;
+    }
+
+    .game-desc {
+      color: rgba(255,255,255,0.9);
+      font-size: 11px;
+      line-height: 1.4;
+      text-align: center;
+      margin-bottom: 24px;
+      transform: translateY(20px);
+      transition: transform 0.4s ease;
+    }
+
+    .game-card:hover .game-desc {
+      transform: translateY(0);
+    }
+
+    .game-play-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-family: var(--pixel);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .game-play-btn:hover {
+      background: #fff;
+      color: var(--accent);
+      transform: translateY(-2px);
     }
   </style>
 </head>
 <body>
 <div class="app">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">🕹️</div>
+        <div class="logo-text">POKE<span>PLAY</span> ARCADE</div>
+      </div>
+      <div class="header-badges">
+        <div class="badge badge-gba">ADVANCE</div>
+        <div class="badge badge-emu">GAMES HUB</div>
+      </div>
+    </header>
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo">
-      <div class="logo-icon">🎮</div>
-      <div class="logo-text"><span>Poke</span>Play</div>
+    <!-- LANDING VIEW -->
+    <section id="view-home" class="view active">
+      <h1 class="hero-title">WELCOME TO THE ARCADE</h1>
+      <p class="hero-subtitle">Select your play style and dive into the classics.</p>
+      <div class="option-grid">
+        <div class="option-card" onclick="switchView('view-emulator')">
+          <span class="option-icon">📂</span>
+          <h3 class="option-name">PLAY YOUR OWN</h3>
+          <p class="option-desc">Upload your local .gba files and enjoy high-speed, lagless emulation instantly.</p>
+        </div>
+        <div class="option-card" onclick="switchView('view-library')">
+          <span class="option-icon">🏰</span>
+          <h3 class="option-name">GAME LIBRARY</h3>
+          <p class="option-desc">Choose from our curated catalog of 23 pre-loaded legendary Gameboy classics.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIBRARY VIEW -->
+    <section id="view-library" class="view">
+      <div class="library-header">
+        <h2 class="hero-title" style="font-size: 20px; margin: 0;">LEGENDARY COLLECTION</h2>
+        <button class="meta-btn" onclick="switchView('view-home')">⌂ BACK HOME</button>
+      </div>
+      <div id="library-grid" style="display: contents;"></div>
+    </section>
+
+    <!-- EMULATOR VIEW -->
+    <main id="view-emulator" class="view">
+      <div class="stage">
+        <!-- LEFT: GBA SHELL -->
+        <div class="gba-shell" id="gba-shell">
+          <div class="screen-bezel">
+            <div class="screen-label">GAME BOY ADVANCE</div>
+            <div class="screen-wrap" style="aspect-ratio: 3/2; width: 100%; max-width: 100vw; max-height: 100vh; position: relative;">
+              <canvas id="gba-canvas" width="240" height="160" style="width: 100%; height: 100%; object-fit: contain;"></canvas>
+              <div class="scanlines"></div>
+              <div class="screen-glow"></div>
+              <div class="screen-splash" id="screen-splash">
+                <div class="splash-content">
+                  <div class="loading-icon">🕹️</div>
+                  <div class="splash-text">System IDLE</div>
+                  <div class="splash-subtext">Insert ROM to begin...</div>
+                </div>
+              </div>
+              <div id="joystick-overlay" class="joystick-base" style="pointer-events:none;">
+                <div id="joystick-knob-canvas" class="joystick-knob" style="display:none"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gba-controls">
+            <div id="joystick-base" class="joystick-base">
+              <div id="joystick-knob" class="joystick-knob" style="display:none"></div>
+            </div>
+
+            <div class="dpad">
+              <div class="dpad-btn dpad-up"    data-key="ArrowUp"    id="dp-up">▲</div>
+              <div class="dpad-btn dpad-down"  data-key="ArrowDown"  id="dp-down">▼</div>
+              <div class="dpad-btn dpad-left"  data-key="ArrowLeft"  id="dp-left">◀</div>
+              <div class="dpad-btn dpad-right" data-key="ArrowRight" id="dp-right">▶</div>
+              <div class="dpad-center"></div>
+            </div>
+
+            <div class="center-cluster">
+              <div class="shoulder-btns">
+                <div class="shoulder-btn" data-key="a" id="btn-l">L</div>
+                <div class="shoulder-btn" onclick="toggleControlsModal()" style="background:var(--accent); color:white; border:none;">? HELP</div>
+                <div class="shoulder-btn" data-key="s" id="btn-r">R</div>
+              </div>
+              <div class="start-select">
+                <div class="meta-btn" data-key="Backspace" id="btn-sel">SELECT</div>
+                <div class="meta-btn" id="btn-mode" onclick="toggleControlLayout()">🕹️ JOY</div>
+                <div class="meta-btn" data-key="Enter"     id="btn-sta">START</div>
+              </div>
+            </div>
+
+            <div class="action-btns">
+              <div class="action-btn btn-b" data-key="x" id="btn-b">B</div>
+              <div class="action-btn btn-a" data-key="z" id="btn-a">A</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: SIDEBAR -->
+        <div class="sidebar">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-header-dot"></div>ROM CARTRIDGE</div>
+            <div class="panel-body">
+              <div class="rom-load-zone" id="rom-zone" onclick="document.getElementById('rom-input').click()">
+                <div class="rom-icon">🗂️</div>
+                <div class="rom-label" id="rom-label">DROP .GBA FILE HERE</div>
+                <div class="rom-name" id="rom-name" style="display:none"></div>
+              </div>
+              <input type="file" id="rom-input" accept=".gba,.gb,.gbc" hidden />
+              <button class="load-btn" id="start-btn" onclick="startGame()" disabled>▶ START GAME</button>
+            </div>
+            <div class="status-bar">
+              <div class="status-dot" id="status-dot"></div>
+              <span id="status-text">No ROM loaded</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><div class="panel-header-dot" style="background:var(--amber)"></div>EMULATOR CONTROLS</div>
+            <div class="panel-body">
+              <div class="ctrl-grid">
+                <button class="ctrl-btn" id="btn-pause" onclick="togglePause()" disabled>⏸</button>
+                <button class="ctrl-btn" id="btn-reset" onclick="resetGame()" disabled>↩</button>
+                <button class="ctrl-btn ctrl-btn-wide" id="btn-fs" onclick="toggleFullscreen()" disabled>⛶ FULLSCREEN</button>
+              </div>
+              <div class="speed-row" style="margin-top:10px;">
+                <div class="speed-btn active" data-speed="1" onclick="setSpeed(1)">1×</div>
+                <div class="speed-btn" data-speed="2" onclick="setSpeed(2)">2×</div>
+                <div class="speed-btn" data-speed="4" onclick="setSpeed(4)">4×</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><div class="panel-header-dot" style="background:var(--accent)"></div>SAVE STATES</div>
+            <div class="panel-body">
+              <div class="save-slots" id="save-slots"></div>
+            </div>
+          </div>
+          
+          <button class="meta-btn" onclick="switchView('view-home')" style="width:100%; border-radius:12px; margin-top:10px;">⌂ BACK TO HOME</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- HELP MODAL -->
+  <div id="modal-controls" class="modal-overlay" onclick="toggleControlsModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h2 class="modal-title">HOW TO PLAY (PC)</h2>
+      <div class="key-map">
+        <div class="key-row"><span class="key-label">A Button</span><span class="key-chip">Z</span></div>
+        <div class="key-row"><span class="key-label">B Button</span><span class="key-chip">X</span></div>
+        <div class="key-row"><span class="key-label">D-Pad</span><span class="key-chip">ARROWS</span></div>
+        <div class="key-row"><span class="key-label">Start</span><span class="key-chip">ENTER</span></div>
+        <div class="key-row"><span class="key-label">Select</span><span class="key-chip">BACKSPACE</span></div>
+        <div class="key-row"><span class="key-label">L / R</span><span class="key-chip">A / S</span></div>
+      </div>
+      <button class="modal-close" onclick="toggleControlsModal()">GOT IT!</button>
     </div>
-    <div class="header-badges">
-      <span class="badge badge-gba">GBA EMU</span>
-      <span class="badge badge-emu">v1.0</span>
-    </div>
-  </header>
+  </div>
 
-  <!-- MAIN STAGE -->
-  <main class="stage">
-
-    <!-- LEFT: GBA SHELL -->
-    <div class="gba-shell" id="gba-shell">
-
-      <!-- Screen Bezel -->
-      <div class="screen-bezel">
-        <div class="screen-label">● GAME BOY ADVANCE ●</div>
-        <div class="screen-wrap" id="screen-wrap">
-          <!-- Idle Splash -->
-          <div class="screen-splash" id="screen-splash">
-            <div class="splash-pokeball">⚪</div>
-            <div class="splash-logo">POKEPLAY</div>
-            <div class="splash-sub">GAME BOY ADVANCE<br>BROWSER EMULATOR</div>
-            <div class="splash-cta">▶ LOAD ROM TO START</div>
-          </div>
-          <canvas id="gba-canvas" width="240" height="160"></canvas>
-          <div class="scanlines"></div>
-          <div class="screen-glow"></div>
-        </div>
-      </div>
-
-      <!-- GBA Controls Row -->
-      <div class="gba-controls">
-
-        <!-- D-Pad / Joystick -->
-        <div class="dpad" id="joystick-base">
-          <div class="joystick-knob" id="joystick-knob" style="display:none"></div>
-          <div class="dpad-btn dpad-up"    data-key="ArrowUp"    id="dp-up">▲</div>
-          <div class="dpad-btn dpad-down"  data-key="ArrowDown"  id="dp-down">▼</div>
-          <div class="dpad-btn dpad-left"  data-key="ArrowLeft"  id="dp-left">◀</div>
-          <div class="dpad-btn dpad-right" data-key="ArrowRight" id="dp-right">▶</div>
-          <div class="dpad-center"></div>
-        </div>
-
-        <!-- Center -->
-        <div class="center-cluster">
-          <div class="shoulder-btns">
-            <div class="shoulder-btn" data-key="a" id="btn-l">L</div>
-            <div class="shoulder-btn" data-key="s" id="btn-r">R</div>
-          </div>
-          <div class="start-select">
-            <div class="meta-btn" data-key="Backspace" id="btn-sel">SELECT</div>
-            <div class="meta-btn" id="btn-mode" onclick="toggleControlLayout()">🕹️ JOY</div>
-            <div class="meta-btn" data-key="Enter"     id="btn-sta">START</div>
-          </div>
-        </div>
-
-        <!-- A / B -->
-        <div class="action-btns">
-          <div class="action-btn btn-b" data-key="x" id="btn-b">B</div>
-          <div class="action-btn btn-a" data-key="z" id="btn-a">A</div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- RIGHT: SIDEBAR -->
-    <div class="sidebar">
-
-      <!-- ROM LOADER -->
-      <div class="panel">
-        <div class="panel-header"><div class="panel-header-dot"></div>ROM CARTRIDGE</div>
-        <div class="panel-body">
-          <div class="rom-load-zone" id="rom-zone" onclick="document.getElementById('rom-input').click()">
-            <div class="rom-icon">🗂️</div>
-            <div class="rom-label" id="rom-label">DROP .GBA FILE HERE<br>OR CLICK TO BROWSE</div>
-            <div class="rom-name" id="rom-name" style="display:none"></div>
-          </div>
-          <input type="file" id="rom-input" accept=".gba,.gb,.gbc" />
-          <button class="load-btn" id="start-btn" onclick="startGame()" disabled>▶ START GAME</button>
-        </div>
-        <div class="status-bar">
-          <div class="status-dot" id="status-dot"></div>
-          <span id="status-text">No ROM loaded</span>
-        </div>
-      </div>
-
-      <!-- CONTROLS -->
-      <div class="panel">
-        <div class="panel-header"><div class="panel-header-dot" style="background:var(--amber);box-shadow:0 0 6px var(--amber)"></div>EMULATOR CONTROLS</div>
-        <div class="panel-body">
-          <div class="ctrl-grid">
-            <button class="ctrl-btn" id="btn-pause" onclick="togglePause()" disabled>⏸ PAUSE</button>
-            <button class="ctrl-btn" id="btn-reset" onclick="resetGame()" disabled>↩ RESET</button>
-            <button class="ctrl-btn ctrl-btn-wide" id="btn-fs" onclick="toggleFullscreen()" disabled>⛶ FULLSCREEN</button>
-          </div>
-          <div class="speed-row">
-            <div class="speed-btn active" data-speed="1" onclick="setSpeed(1)">1×</div>
-            <div class="speed-btn" data-speed="2" onclick="setSpeed(2)">2×</div>
-            <div class="speed-btn" data-speed="4" onclick="setSpeed(4)">4×</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SAVE STATES -->
-      <div class="panel">
-        <div class="panel-header"><div class="panel-header-dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></div>SAVE STATES</div>
-        <div class="panel-body">
-          <div class="save-slots" id="save-slots">
-            <!-- Rendered by JS -->
-          </div>
-        </div>
-      </div>
-
-      <!-- KEY MAP -->
-      <div class="panel">
-        <div class="panel-header"><div class="panel-header-dot" style="background:var(--text-dim)"></div>KEYBOARD MAP</div>
-        <div class="panel-body">
-          <div class="key-map">
-            <div class="key-row"><span class="key-label">A Button</span><span class="key-chip">Z</span></div>
-            <div class="key-row"><span class="key-label">B Button</span><span class="key-chip">X</span></div>
-            <div class="key-row"><span class="key-label">Start</span><span class="key-chip">ENTER</span></div>
-            <div class="key-row"><span class="key-label">Select</span><span class="key-chip">BKSP</span></div>
-            <div class="key-row"><span class="key-label">L Button</span><span class="key-chip">A</span></div>
-            <div class="key-row"><span class="key-label">R Button</span><span class="key-chip">S</span></div>
-            <div class="key-row"><span class="key-label">D-Pad</span><span class="key-chip">ARROWS</span></div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /sidebar -->
-  </main>
-</div>
-
-<!-- TOAST -->
-<div id="toast"></div>
+  <!-- TOAST -->
+  <div id="toast"></div>
 
 <!-- GBA.js Local Files -->
 <script src="pokeplay/gba/util.js"></script>
@@ -1203,34 +1418,213 @@
     'z': 0, 'x': 1, 'Backspace': 2, 'Enter': 3, 'a': 8, 's': 9,
   };
 
+  const GAMES_DATA = [
+    { 
+      id: 'firered', title: 'Pokemon FireRed', genre: 'RPG',
+      file: 'gba games list/Pokemon - FireRed Version (USA, Europe) (Rev 1).gba',
+      poster: 'posters/firered.png',
+      desc: 'An enhanced remake of the original Pokémon Red where players capture and battle Pokémon in the iconic Kanto region.'
+    },
+    { 
+      id: 'emerald', title: 'Pokemon Emerald', genre: 'RPG',
+      file: 'gba games list/Pokemon - Emerald Version (USA, Europe).gba',
+      poster: 'posters/emerald.png',
+      desc: 'The definitive Hoenn journey where you navigate Team Magma and Team Aqua while perfecting your party for the Battle Frontier.'
+    },
+    { 
+      id: 'zelda_minish', title: 'The Minish Cap', genre: 'Adventure',
+      file: 'gba games list/Legend of Zelda, The - The Minish Cap (USA).gba',
+      poster: 'posters/zelda_minish.png',
+      desc: 'Link embarks on a whimsical journey with a resizing hat named Ezlo to shrink and save Hyrule from a tiny perspective.'
+    },
+    { 
+      id: 'kirby', title: 'Nightmare in Dream Land', genre: 'Platformer',
+      file: 'gba games list/Kirby - Nightmare in Dream Land (USA).gba',
+      poster: 'posters/kirby.png',
+      desc: 'Kirby traverses colorful worlds to retrieve pieces of the Star Rod and restore peaceful dreams to the Fountain of Dreams.'
+    },
+    { 
+      id: 'metroid', title: 'Metroid Fusion', genre: 'Action',
+      file: 'gba games list/Metroid Fusion (USA).gba',
+      poster: 'posters/metroid.png',
+      desc: 'Bounty hunter Samus Aran investigates a space station to eradicate the shape-shifting X parasite while avoiding her mechanical double.'
+    },
+    { 
+      id: 'ff6', title: 'Final Fantasy VI', genre: 'RPG',
+      file: 'gba games list/Final Fantasy 6 Advance # GBA.GBA',
+      poster: 'posters/ff6.png',
+      desc: 'A stunning RPG story of magic and rebellion against a ruthless Empire across a sprawling world of industrial fantasy.'
+    },
+    { 
+      id: 'sonic3', title: 'Sonic Advance 3', genre: 'Platformer',
+      file: 'gba games list/Sonic Advance 3 (USA) (En,Ja,Fr,De,Es,It).gba',
+      poster: 'posters/sonic3.png',
+      desc: 'Sonic and friends unite to save a world shattered into seven pieces by Dr. Eggman using unique team-based mechanics.'
+    },
+    { 
+      id: 'fire_emblem', title: 'The Sacred Stones', genre: 'Strategy',
+      file: 'gba games list/Fire Emblem - The Sacred Stones (USA, Australia).gba',
+      poster: 'posters/fire_emblem.png',
+      desc: 'Royal siblings Eirika and Ephraim lead an army across Magvel to reclaim their kingdom and halt a sudden imperial invasion.'
+    },
+    { 
+      id: 'metal_slug', title: 'Metal Slug Advance', genre: 'Shooter',
+      file: 'gba games list/1840 - Metal Slug Advance (E)(TRSI).gba',
+      poster: 'posters/metal_slug.png',
+      desc: 'Intense run-and-gun combat where recruits battle through challenging levels of high-speed explosive action.'
+    },
+    { 
+      id: 'mario_bros', title: 'Super Mario Bros.', genre: 'Platformer',
+      file: 'gba games list/Classic NES Series - Super Mario Bros. (USA, Europe).gba',
+      poster: 'posters/mario_bros.png',
+      desc: 'The original NES masterpiece that defined platforming, faithfully ported to follow Mario as he rescues Princess Peach.'
+    },
+    { 
+      id: 'crash', title: 'Crash Bandicoot', genre: 'Platformer',
+      file: 'gba games list/Crash Bandicoot - The Huge Adventure (USA).gba',
+      poster: 'posters/crash.png',
+      desc: 'Crash travels through warped dimensions to collect crystals and stop Dr. Neo Cortex from shrinking the Earth.'
+    },
+    { 
+      id: 'dbz', title: 'Dragon Ball Adventure', genre: 'Action',
+      file: 'gba games list/Dragon Ball - Advanced Adventure (USA).gba',
+      poster: 'posters/dbz.png',
+      desc: 'Follow young Goku’s earliest adventures as he fights enemies and searches for the legendary Dragon Balls in this action platformer.'
+    },
+    { 
+      id: 'golden_sun', title: 'Golden Sun', genre: 'RPG',
+      file: 'gba games list/Golden Sun (USA, Europe).gba',
+      poster: 'posters/golden_sun.png',
+      desc: 'A party of magically attuned Adepts sets out on an heroic epic to protect the world from the return of Alchemy.'
+    },
+    { 
+      id: 'gta', title: 'GTA Advance', genre: 'Action',
+      file: 'gba games list/Grand Theft Auto Advance (USA).gba',
+      poster: 'posters/gta.png',
+      desc: 'A top-down prequel to GTA III following criminal Mike seeking revenge through dangerous missions in Liberty City.'
+    },
+    { 
+      id: 'zelda_lttp', title: 'Link to the Past', genre: 'Adventure',
+      file: 'gba games list/Legend of Zelda, The - A Link to the Past & Four Swords (USA).gba',
+      poster: 'posters/zelda a link to the past poster.jpg',
+      desc: 'Includes a classic masterpiece to save Hyrule and a multiplayer journey to defeat the evil wind mage Vaati.'
+    },
+    { 
+      id: 'marvel', title: 'Ultimate Alliance', genre: 'Action',
+      file: 'gba games list/Marvel - Ultimate Alliance (USA).gba',
+      poster: 'posters/marvel.png',
+      desc: 'Assemble a customizable strike team of iconic Marvel superheroes to battle legendary villains in this action RPG.'
+    },
+    { 
+      id: 'naruto', title: 'Ninja Council 2', genre: 'Action',
+      file: 'gba games list/Naruto - Ninja Council 2 (USA).gba',
+      poster: 'posters/naruto.png',
+      desc: 'Take control of the Hidden Leaf Village ninja to battle through levels based on the intense Naruto anime.'
+    },
+    { 
+      id: 'one_piece', title: 'One Piece', genre: 'Action',
+      file: 'gba games list/One Piece (USA).gba',
+      poster: 'posters/one_piece.png',
+      desc: 'Luffy and his crew explore and battle across the high seas in this action-adventure based on the popular anime.'
+    },
+    { 
+      id: 'pkm_mystery', title: 'Red Rescue Team', genre: 'RPG',
+      file: 'gba games list/Pokemon Mystery Dungeon - Red Rescue Team (USA, Australia).gba',
+      poster: 'posters/pkm_mystery.png',
+      desc: 'Wake up as a Pokémon and join a rescue team to unravel your transformation through ever-changing dungeons.'
+    },
+    { 
+      id: 'pkm_uv', title: 'Pokemon Ultra Violet', genre: 'RPG',
+      file: 'gba games list/Pokemon Ultra Violet (1.22) LSA (Fire Red Hack).gba',
+      poster: 'posters/firered.png',
+      desc: 'A massive FireRed hack that lets you catch every Pokémon and explore a significantly expanded world.'
+    },
+    { 
+      id: 'sf_alpha3', title: 'SF Alpha 3', genre: 'Fighting',
+      file: 'gba games list/Street Fighter Alpha 3 (USA).gba',
+      poster: 'posters/sf_alpha3.png',
+      desc: 'A faithful conversion of the classic arcade fighter bringing massive rosters and high-speed competitive combat to handheld.'
+    },
+    { 
+      id: 'mario_world', title: 'Super Mario World', genre: 'Platformer',
+      file: 'gba games list/Super Mario Advance 2 - Super Mario World (USA, Australia).gba',
+      poster: 'posters/mario_world.png',
+      desc: 'Explore Dinosaur Land as Mario or Luigi to rescue Peach in this celebrated Super Nintendo platformer port.'
+    },
+    { 
+      id: 'yugioh', title: 'Yu-Gi-Oh! 2004', genre: 'Strategy',
+      file: 'gba games list/1435 - Yu-Gi-Oh! - World Championship Tournament 2004 (E)(GBA).gba',
+      poster: 'posters/yugioh.png',
+      desc: 'Bring intense competitive card dueling to your handheld, following the official rules and massive card pool.'
+    }
+  ];
+
   document.addEventListener('DOMContentLoaded', () => {
     fetch('pokeplay/gba/bios.bin')
       .then(res => res.arrayBuffer())
-      .then(buf => {
-        biosBuffer = buf;
-        const defaultRom = 'Pokemon - FireRed Version (USA, Europe) (Rev 1).gba';
-        return fetch(defaultRom);
-      })
-      .then(res => {
-        if (!res) return;
-        return res.arrayBuffer().then(buf => {
-          loadRomFromBuffer(buf, 'Pokemon - FireRed Version (USA, Europe) (Rev 1).gba');
-          setTimeout(startGame, 1000);
-        });
-      })
-      .catch(e => console.warn("Initialization resource missing:", e));
+      .then(buf => { biosBuffer = buf; })
+      .catch(e => console.warn("BIOS fetch failed:", e));
 
+    renderLibrary();
     renderSaveSlots();
     initDragDrop();
     initKeyboard();
     initOnScreenControls();
     initRomInput();
     
-    // Load saved control layout
     const savedLayout = localStorage.getItem('pokeplay_control_mode') || 'mode-joystick';
-    document.getElementById('gba-shell').classList.add(savedLayout);
-    updateLayoutToggleButton();
+    document.body.classList.add(savedLayout);
   });
+
+  function switchView(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function renderLibrary() {
+    const grid = document.getElementById('library-grid');
+    grid.innerHTML = GAMES_DATA.map(game => `
+      <div class="game-card" onclick="launchPreloadedGame('${game.id}')">
+        <div class="game-thumb">
+          <img src="${game.poster}" class="game-poster" loading="lazy" alt="${game.title}">
+          <div class="game-overlay">
+            <p class="game-desc">${game.desc}</p>
+            <button class="game-play-btn">START GAME</button>
+          </div>
+        </div>
+        <div class="game-info">
+          <div class="game-title">${game.title}</div>
+          <div class="game-genre">${game.genre}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function launchPreloadedGame(gameId) {
+    const game = GAMES_DATA.find(g => g.id === gameId);
+    if (!game) return;
+    
+    showToast('Loading ' + game.title + '...', 'info');
+    try {
+      const res = await fetch(game.file);
+      const buf = await res.arrayBuffer();
+      loadRomFromBuffer(buf, game.title);
+      switchView('view-emulator');
+      setTimeout(() => {
+        startGame();
+        // Smart Fullscreen for Mobile/Tablet
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) toggleFullscreen();
+      }, 500);
+    } catch(e) {
+      showToast('Fetch failed.', 'error');
+    }
+  }
+
+  function toggleControlsModal() {
+    document.getElementById('modal-controls').classList.toggle('active');
+  }
 
   function initGBA() {
     if (typeof GBA === 'undefined') return false;
@@ -1447,6 +1841,12 @@
   function initKeyboard() {
     const preventKeys = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Backspace'];
     document.addEventListener('keydown', (e) => {
+      // SMART TOGGLES (PC ONLY)
+      if (e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+
       if (preventKeys.includes(e.key)) e.preventDefault();
       const key = KEY_MAP[e.key];
       if (key !== undefined && gba && isRunning) {
