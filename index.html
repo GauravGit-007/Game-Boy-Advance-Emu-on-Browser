@@ -37,6 +37,20 @@
       --green:       #10ac84;
       --pixel: 'Press Start 2P', monospace;
       --mono: 'Share Tech Mono', monospace;
+
+      /* Base PC / Tablet Control Scale */
+      --dpad-size: 150px;
+      --dpad-btn: calc(var(--dpad-size) / 3);
+      --ab-size: 80px;
+      --joy-size: 150px;
+      --joy-knob: 60px;
+      --shoulder-h: 50px;
+      --shoulder-w: 150px;
+      --meta-w: 80px;
+      --meta-h: 36px;
+      --font-sm: 12px;
+      --font-md: 20px;
+      --gap: 16px;
     }
 
     html, body {
@@ -1062,15 +1076,14 @@
       }
 
       /* Control Editing HUD */
+      /* Control Editing HUD */
       .edit-ui-hud {
         position: absolute !important; inset: 0 !important; z-index: 60 !important;
         display: flex !important; flex-direction: column !important;
         align-items: center !important; justify-content: flex-start !important;
-        background: rgba(0,0,0,0.85) !important;
-        backdrop-filter: blur(4px);
         padding: 20px !important;
         font-family: var(--pixel); color: #fff;
-        pointer-events: none; /* Let clicks pass through except on HUD controls */
+        pointer-events: none; /* Let clicks pass through to draggable buttons */
       }
       .edit-ui-hud.hidden { display: none !important; }
       .edit-ui-hud > * { pointer-events: auto; } /* Re-enable for panel content */
@@ -1213,24 +1226,7 @@
         }
       }
 
-      /* 2. TABLETS (600px - 1024px) */
-      @media (min-width: 600px) {
-        .control-zone {
-          /* Fixed, ergonomic sizing for dual-hand wide grip */
-          --dpad-size: 150px;
-          --dpad-btn: calc(var(--dpad-size) / 3);
-          --ab-size: 80px;
-          --joy-size: 150px;
-          --joy-knob: 60px;
-          --shoulder-h: 50px;
-          --shoulder-w: 150px;
-          --meta-w: 80px;
-          --meta-h: 36px;
-          --font-sm: 12px;
-          --font-md: 20px;
-          --gap: 16px;
-        }
-      }
+      /* 2. TABLETS (600px - 1024px) inherits from global variable set mapped above */
 
       .shoulder-row {
         flex-shrink: 0; height: var(--shoulder-h);
@@ -1476,12 +1472,12 @@
                 <div class="edit-ui-panel">
                   <div style="font-size:14px; margin-bottom:12px; color:var(--text);">⚙️ UI EDITOR</div>
                   
-                  <div id="edit-target-label" style="font-size:9px; color:var(--text-dim); margin-bottom:12px;">
+                  <div id="edit-target-label" style="font-size:8px; color:var(--text-dim); margin-bottom:12px;">
                     Select an element to resize,<br/>or drag it anywhere.
                   </div>
                   
                   <div style="margin-bottom:16px; display:flex; gap:10px; align-items:center;">
-                    <span style="font-size:10px;">Size</span>
+                    <span style="font-size:8px;">Size</span>
                     <input type="range" id="edit-scale-slider" min="0.5" max="2.0" step="0.05" value="1.0" style="flex:1" oninput="updateActiveNodeScale(this.value)" />
                   </div>
 
