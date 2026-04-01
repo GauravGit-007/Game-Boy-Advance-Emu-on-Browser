@@ -979,9 +979,9 @@
       }
 
       #gba-shell:fullscreen .screen-bezel {
-        width: 96vw !important; /* Expanded horizontal reach */
+        width: 96vw !important;
         max-width: 1600px !important; 
-        max-height: 94vh !important; /* Utilized more vertical space safely */
+        max-height: 94vh !important;
         height: auto !important;
         aspect-ratio: 3/2;
         border-width: 50px !important; 
@@ -995,8 +995,25 @@
         justify-content: center;
       }
 
+      /* Make screen-zone, screen-wrap, and canvas fill the bezel on PC fullscreen */
+      #gba-shell:fullscreen .screen-zone {
+        width: 100% !important; height: 100% !important;
+        display: flex !important; align-items: center !important; justify-content: center !important;
+      }
+      #gba-shell:fullscreen .screen-wrap {
+        width: 100% !important; height: 100% !important;
+        aspect-ratio: auto !important;
+      }
+      #gba-shell:fullscreen #gba-canvas-container {
+        width: 100% !important; height: 100% !important;
+      }
+      #gba-shell:fullscreen canvas {
+        width: 100% !important; height: 100% !important;
+        object-fit: contain !important;
+      }
+
       #gba-shell:fullscreen .gba-controls {
-        display: none !important; /* Controls aren't needed on PC FS because of Keyboard */
+        display: none !important;
       }
     } /* CLOSE PC MEDIA QUERY */
 
@@ -1141,9 +1158,11 @@
         background: radial-gradient(circle at 35% 35%, #556, #333) !important;
         border-radius: 50% !important;
         position: absolute !important;
-        top: 50% !important; left: 50% !important;
-        transform: translate(-50%, -50%) !important;
+        top: 26px !important; left: 26px !important;
+        /* NO transform here - JS controls transform for movement */
         border: 2px solid rgba(255,255,255,0.2) !important;
+        display: block !important;
+        touch-action: none !important;
       }
 
       #gba-shell.mode-joystick .dpad-col .dpad { display: none !important; }
