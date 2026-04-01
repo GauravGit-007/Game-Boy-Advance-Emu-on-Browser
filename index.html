@@ -1000,15 +1000,15 @@
       }
     } /* CLOSE PC MEDIA QUERY */
 
-    /* ─── POKEPLAY HANDHELD ENGINE (UNIFIED v3.0) ─────────────────── */
+    /* ─── POKEPLAY HANDHELD ENGINE (UNIFIED v4.0) ─────────────────── */
     
     @media screen and (max-width: 1024px) {
-      /* Reset Global Layout for Handheld */
-      body { overflow: hidden !important; position: fixed; width: 100vw; height: 100svh; }
-      header { display: none !important; } /* Hide header in handheld mode to maximize space */
-      .sidebar { display: none !important; } /* Hide sidebar - managed via game library view */
-      .container { padding: 0 !important; max-width: none !important; margin: 0 !important; }
-      .stage { padding: 0 !important; margin: 0 !important; display: block !important; }
+      /* Only lock scroll when emulator is active */
+      body.emulator-active { overflow: hidden !important; position: fixed; width: 100vw; height: 100svh; }
+      
+      .sidebar { display: none !important; }
+      .stage { padding: 0 !important; margin: 0 !important; display: block !important; max-width: none !important; }
+      
       #gba-shell { 
         width: 100vw !important; height: 100svh !important; 
         border-radius: 0 !important; background: #000 !important; 
@@ -1016,7 +1016,6 @@
         margin: 0 !important; border: none !important;
       }
 
-      /* Core Handheld Wrapper */
       .app-layout {
         display: flex !important;
         width: 100vw !important;
@@ -1025,105 +1024,137 @@
         background: #000 !important;
       }
 
-      /* 1. PORTRAIT PROFILE */
+      /* Screen & Bezel: fill the zone completely */
+      .screen-zone {
+        display: flex !important; align-items: center !important; justify-content: center !important;
+        background: #000 !important;
+        overflow: hidden !important;
+      }
+      .screen-zone .screen-bezel {
+        width: 100% !important; height: 100% !important;
+        background: #000 !important; padding: 0 !important;
+        border: none !important; box-shadow: none !important;
+        border-radius: 0 !important; margin: 0 !important;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .screen-zone .screen-wrap {
+        width: 100% !important; height: 100% !important;
+        background: #000 !important; padding: 0 !important;
+        border: none !important; box-shadow: none !important;
+        border-radius: 0 !important; aspect-ratio: auto !important;
+      }
+      .screen-zone #gba-canvas-container {
+        width: 100% !important; height: 100% !important;
+      }
+      .screen-zone canvas {
+        width: 100% !important; height: 100% !important;
+        object-fit: contain !important;
+        image-rendering: pixelated;
+      }
+      .screen-zone .screen-label { display: none !important; }
+      .screen-zone .screen-splash { border-radius: 0 !important; }
+
+      /* ── 1. PORTRAIT ── */
       @media (orientation: portrait) {
         .app-layout { flex-direction: column !important; }
-        .screen-zone {
-          flex: 0 0 58svh !important;
-          width: 100vw !important;
-          display: flex !important; align-items: center !important; justify-content: center !important;
-          background: #000 !important;
-        }
+        .screen-zone { flex: 0 0 58svh !important; width: 100vw !important; }
         .control-zone {
-          flex: 0 0 42svh !important;
-          width: 100vw !important;
+          flex: 0 0 42svh !important; width: 100vw !important;
           background: linear-gradient(180deg, #1a2a47 0%, #0d1526 100%) !important;
           display: flex !important; flex-direction: column !important;
-          padding: 8px 12px 12px !important;
-          box-shadow: inset 0 2px 10px rgba(255,255,255,0.05);
+          padding: 6px 10px 10px !important;
           position: relative; z-index: 10;
         }
-
-        /* 3-Column Deck */
         .main-deck {
           display: grid !important;
           grid-template-columns: 2fr 1fr 2fr !important;
-          flex: 1 !important;
-          align-items: center !important;
-          gap: 10px;
+          flex: 1 !important; align-items: center !important;
         }
       }
 
-      /* 2. LANDSCAPE PROFILE */
+      /* ── 2. LANDSCAPE ── */
       @media (orientation: landscape) {
         .app-layout { flex-direction: row !important; }
-        .screen-zone {
-          flex: 0 0 55vw !important;
-          height: 100svh !important;
-        }
+        .screen-zone { flex: 0 0 55vw !important; height: 100svh !important; }
         .control-zone {
-          flex: 0 0 45vw !important;
-          height: 100svh !important;
+          flex: 0 0 45vw !important; height: 100svh !important;
           background: #0d1526 !important;
           display: flex !important; flex-direction: column !important;
-          padding: 10px !important; gap: 10px !important;
+          padding: 8px !important;
         }
         .main-deck {
           display: grid !important;
           grid-template-columns: 1fr 1fr !important;
-          flex: 1 !important;
+          flex: 1 !important; align-items: center !important;
         }
-        .meta-col { display: flex !important; flex-direction: row !important; height: 40px; justify-content: center; }
       }
 
-      /* Internal Grid Components */
+      /* ── Control Components ── */
       .shoulder-row {
-        height: 60px; display: flex; justify-content: space-between; align-items: center;
-        padding: 0 10px;
+        flex-shrink: 0; height: 44px;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0 8px;
       }
       .shoulder-btn {
-        width: clamp(80px, 22vw, 120px);
-        height: clamp(34px, 8vw, 42px);
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 8px; color: #fff; font-weight: bold;
+        width: clamp(80px, 22vw, 120px); height: clamp(32px, 7vw, 40px);
+        background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 8px; color: #fff; font-weight: bold; font-size: 11px;
         display: flex; align-items: center; justify-content: center;
       }
-      .help-btn { opacity: 0.5; font-size: 10px; color: #fff; }
+      .help-btn { opacity: 0.4; font-size: 9px; color: #fff; cursor: pointer; }
 
-      .dpad-col { display: flex; justify-content: center; transform: scale(1.1); }
-      .meta-col { display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; }
+      .dpad-col {
+        display: flex; justify-content: center; align-items: center;
+        position: relative; min-height: 100px;
+      }
+      .meta-col { display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; }
       .meta-btn { 
-        width: 70px; height: 30px; border-radius: 100px; background: #2a3b5a; 
+        width: 68px; height: 28px; border-radius: 100px; background: #2a3b5a; 
         color: #8a9fc4; font-size: 8px; font-weight: bold;
-        border: 1px solid rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
       }
       
       .action-col { display: flex; justify-content: center; align-items: center; position: relative; }
       .action-btn { 
         width: clamp(52px, 14vw, 68px); height: clamp(52px, 14vw, 68px); 
         border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-weight: bold; font-size: 18px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        font-weight: bold; font-size: 18px; color: #fff;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        cursor: pointer;
       }
-      .btn-b { background: #b01a1a; margin-top: 30px; margin-right: -10px; border: 4px solid #8a1515; }
-      .btn-a { background: #1a7ab0; margin-bottom: 30px; border: 4px solid #155e8a; }
+      .action-col .btn-b { background: #b01a1a; margin-top: 25px; margin-right: -8px; border: 3px solid #8a1515; }
+      .action-col .btn-a { background: #1a7ab0; margin-bottom: 25px; border: 3px solid #155e8a; }
 
-      /* Visual Fixes */
-      .screen-zone canvas { width: 100%; height: 100%; max-height: 100%; object-fit: contain; }
-      .screen-bezel, .screen-wrap { background: transparent !important; padding: 0 !important; border: none !important; box-shadow: none !important; }
-      .screen-label { display: none !important; }
+      /* ── Joystick / D-Pad Toggle ── */
+      .dpad-col .dpad { position: relative; }
+      .dpad-col .joystick-base {
+        position: relative !important;
+        width: 96px !important; height: 96px !important;
+        background: rgba(255,255,255,0.08) !important;
+        border-radius: 50% !important;
+        border: 2px solid rgba(255,255,255,0.15) !important;
+      }
+      .dpad-col .joystick-base .joystick-knob {
+        width: 44px !important; height: 44px !important;
+        background: radial-gradient(circle at 35% 35%, #556, #333) !important;
+        border-radius: 50% !important;
+        position: absolute !important;
+        top: 50% !important; left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        border: 2px solid rgba(255,255,255,0.2) !important;
+      }
 
-      /* Joystick / Dpad Toggles */
-      #gba-shell.mode-joystick .dpad { display: none !important; }
-      #gba-shell.mode-joystick #joystick-base { display: block !important; }
-      #gba-shell.mode-dpad .dpad { display: block !important; }
-      #gba-shell.mode-dpad #joystick-base { display: none !important; }
+      #gba-shell.mode-joystick .dpad-col .dpad { display: none !important; }
+      #gba-shell.mode-joystick .dpad-col .joystick-base { display: block !important; }
+      #gba-shell.mode-dpad .dpad-col .dpad { display: block !important; }
+      #gba-shell.mode-dpad .dpad-col .joystick-base { display: none !important; }
 
-
-      /* Tablet Specific Scale */
-      @media (min-width: 481px) {
-        .control-zone { flex: 0 0 35svh !important; }
-        .main-deck { transform: scale(1.3); }
+      /* ── Tablet Scale ── */
+      @media (min-width: 600px) {
+        .shoulder-row { height: 50px; }
+        .main-deck { transform: scale(1.2); }
       }
     }
 
@@ -1311,7 +1342,7 @@
                     <div class="dpad-btn dpad-right" data-key="ArrowRight" id="dp-right">▶</div>
                     <div class="dpad-center"></div>
                   </div>
-                  <div id="joystick-base" class="joystick-base" style="display:none">
+                  <div id="joystick-base" class="joystick-base">
                     <div id="joystick-knob" class="joystick-knob"></div>
                   </div>
                 </div>
@@ -1596,6 +1627,12 @@
   function switchView(viewId) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
+    // Lock body scroll only when emulator is shown
+    if (viewId === 'view-emulator') {
+      document.body.classList.add('emulator-active');
+    } else {
+      document.body.classList.remove('emulator-active');
+    }
     window.scrollTo(0, 0);
   }
 
