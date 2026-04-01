@@ -998,206 +998,126 @@
       #gba-shell:fullscreen .gba-controls {
         display: none !important; /* Controls aren't needed on PC FS because of Keyboard */
       }
+    } /* CLOSE PC MEDIA QUERY */
 
-      #gba-shell:fullscreen .screen-wrap {
-        width: 100% !important;
-        height: 100% !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    /* ─── POKEPLAY HANDHELD ENGINE (UNIFIED v3.0) ─────────────────── */
+    
+    @media screen and (max-width: 1024px) {
+      /* Reset Global Layout for Handheld */
+      body { overflow: hidden !important; position: fixed; width: 100vw; height: 100svh; }
+      header { display: none !important; } /* Hide header in handheld mode to maximize space */
+      .sidebar { display: none !important; } /* Hide sidebar - managed via game library view */
+      .container { padding: 0 !important; max-width: none !important; margin: 0 !important; }
+      .stage { padding: 0 !important; margin: 0 !important; display: block !important; }
+      #gba-shell { 
+        width: 100vw !important; height: 100svh !important; 
+        border-radius: 0 !important; background: #000 !important; 
+        box-shadow: none !important; padding: 0 !important; 
+        margin: 0 !important; border: none !important;
       }
 
-      #gba-shell:fullscreen .screen-label {
-        display: block !important;
-        position: absolute;
-        top: -40px; /* Centered in top bezel */
-        left: 50%;
-        transform: translateX(-50%);
-        opacity: 0.3;
-        font-size: 14px;
-        margin: 0;
-      }
-    }
-
-    /* [Mobile/Tablet] Pro-Handheld 60/40 Split: Absolute Precision */
-    @media screen and (max-width: 1023px) {
-      #gba-shell:fullscreen {
-        background: #000 !important;
+      /* Core Handheld Wrapper */
+      .app-layout {
         display: flex !important;
-        flex-direction: column !important;
-        padding: 0 !important;
         width: 100vw !important;
-        height: 100vh !important;
+        height: 100svh !important;
         overflow: hidden !important;
-        user-select: none !important;
-        -webkit-user-select: none !important;
+        background: #000 !important;
+      }
+
+      /* 1. PORTRAIT PROFILE */
+      @media (orientation: portrait) {
+        .app-layout { flex-direction: column !important; }
+        .screen-zone {
+          flex: 0 0 58svh !important;
+          width: 100vw !important;
+          display: flex !important; align-items: center !important; justify-content: center !important;
+          background: #000 !important;
+        }
+        .control-zone {
+          flex: 0 0 42svh !important;
+          width: 100vw !important;
+          background: linear-gradient(180deg, #1a2a47 0%, #0d1526 100%) !important;
+          display: flex !important; flex-direction: column !important;
+          padding: 8px 12px 12px !important;
+          box-shadow: inset 0 2px 10px rgba(255,255,255,0.05);
+          position: relative; z-index: 10;
+        }
+
+        /* 3-Column Deck */
+        .main-deck {
+          display: grid !important;
+          grid-template-columns: 2fr 1fr 2fr !important;
+          flex: 1 !important;
+          align-items: center !important;
+          gap: 10px;
+        }
+      }
+
+      /* 2. LANDSCAPE PROFILE */
+      @media (orientation: landscape) {
+        .app-layout { flex-direction: row !important; }
+        .screen-zone {
+          flex: 0 0 55vw !important;
+          height: 100svh !important;
+        }
+        .control-zone {
+          flex: 0 0 45vw !important;
+          height: 100svh !important;
+          background: #0d1526 !important;
+          display: flex !important; flex-direction: column !important;
+          padding: 10px !important; gap: 10px !important;
+        }
+        .main-deck {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr !important;
+          flex: 1 !important;
+        }
+        .meta-col { display: flex !important; flex-direction: row !important; height: 40px; justify-content: center; }
+      }
+
+      /* Internal Grid Components */
+      .shoulder-row {
+        height: 60px; display: flex; justify-content: space-between; align-items: center;
+        padding: 0 10px;
+      }
+      .shoulder-btn {
+        width: clamp(80px, 22vw, 120px);
+        height: clamp(34px, 8vw, 42px);
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 8px; color: #fff; font-weight: bold;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .help-btn { opacity: 0.5; font-size: 10px; color: #fff; }
+
+      .dpad-col { display: flex; justify-content: center; transform: scale(1.1); }
+      .meta-col { display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; }
+      .meta-btn { 
+        width: 70px; height: 30px; border-radius: 100px; background: #2a3b5a; 
+        color: #8a9fc4; font-size: 8px; font-weight: bold;
+        border: 1px solid rgba(255,255,255,0.05);
       }
       
-      #gba-shell:fullscreen .screen-bezel {
-        width: 100% !important;
-        height: 60vh !important; /* Top portion for Game */
-        border: none !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        background: #000 !important; /* Unified black screen */
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: none !important;
+      .action-col { display: flex; justify-content: center; align-items: center; position: relative; }
+      .action-btn { 
+        width: clamp(52px, 14vw, 68px); height: clamp(52px, 14vw, 68px); 
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-weight: bold; font-size: 18px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3);
       }
+      .btn-b { background: #b01a1a; margin-top: 30px; margin-right: -10px; border: 4px solid #8a1515; }
+      .btn-a { background: #1a7ab0; margin-bottom: 30px; border: 4px solid #155e8a; }
 
-      #gba-shell:fullscreen .screen-wrap {
-        width: 100% !important;
-        height: auto !important;
-        max-height: 100% !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none !important;
+      /* Visual Fixes */
+      .screen-zone canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+      .screen-bezel, .screen-wrap { background: transparent !important; padding: 0 !important; border: none !important; box-shadow: none !important; }
+      .screen-label { display: none !important; }
+
+      /* Tablet Specific Scale */
+      @media (min-width: 481px) {
+        .control-zone { flex: 0 0 35svh !important; }
+        .main-deck { transform: scale(1.3); }
       }
-
-      #gba-shell:fullscreen canvas {
-        width: 100% !important;
-        height: auto !important;
-        max-height: 100% !important;
-        object-fit: contain !important;
-        image-rendering: pixelated;
-      }
-
-      #gba-shell:fullscreen .screen-label { display: none !important; }
-
-      #gba-shell:fullscreen .gba-controls {
-        height: 40vh !important; /* Bottom portion for Deck */
-        background: #fdfbf7 !important;
-        position: relative !important;
-        padding: 0 !important;
-        display: block !important;
-        border-top: 1px solid rgba(0,0,0,0.1);
-      }
-
-      /* Pro-Handheld Absolute Grid (VISUALLY TESTED) */
-      #gba-shell:fullscreen .triggers {
-        position: absolute !important;
-        top: 20px !important; left: 0 !important; right: 0 !important;
-        display: flex !important; justify-content: space-between !important;
-        padding: 0 40px !important;
-        margin: 0 !important;
-        width: 100% !important;
-        pointer-events: none !important;
-      }
-      #gba-shell:fullscreen .triggers .action-btn { 
-        pointer-events: auto !important;
-        width: 60px !important; height: 35px !important; border-radius: 8px !important; 
-      }
-
-      /* D-pad and Actions on the SAME HORIZON (Center of Deck) */
-      #gba-shell:fullscreen .d-pad {
-        position: absolute !important;
-        left: 30px !important; 
-        top: 45% !important;
-        transform: translateY(-50%) scale(1.3) !important;
-        margin: 0 !important;
-      }
-
-      #gba-shell:fullscreen .actions {
-        position: absolute !important;
-        right: 30px !important; 
-        top: 45% !important;
-        transform: translateY(-50%) scale(1.3) !important;
-        margin: 0 !important;
-        display: flex !important; gap: 20px !important;
-      }
-
-      /* Utilities row at bottom center */
-      #gba-shell:fullscreen .utils {
-        position: absolute !important;
-        bottom: 30px !important; 
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        display: flex !important;
-        gap: 15px !important;
-        margin: 0 !important;
-      }
-      
-      #gba-shell:fullscreen .utils .action-btn { width: 70px !important; height: 32px !important; border-radius: 100px !important; }
-    }
-
-    /* ─── RESPONSIVE ─────────────────────────────────────────────────── */
-    @media (max-width: 900px) {
-      .stage {
-        grid-template-columns: 1fr;
-        max-width: 600px;
-      }
-
-      .gba-shell { border-radius: 20px 20px 48px 48px; }
-    }
-
-    @media (max-width: 480px) {
-      header { padding: 14px 16px; }
-      .logo-text { font-size: 10px; }
-      .stage { padding: 16px 12px; gap: 16px; }
-      .action-btn { width: 38px; height: 38px; font-size: 8px; }
-    }
-
-    /* ─── NEW PORTRAIT FULLSCREEN MODE ─────────────────────────────────── */
-    .gba-shell:fullscreen {
-      width: 100vw;
-      height: 100vh;
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-      border: none;
-      border-radius: 0;
-    }
-
-    @media (orientation: portrait) {
-    /* ─── FULLSCREEN CONTROLS (LIGHT THEME) ────────────────────────── */
-    @media screen {
-      .gba-shell:fullscreen {
-        background: #fdfbf7 !important;
-      }
-
-      .gba-shell:fullscreen .gba-controls {
-        height: 50vh;
-        background: #f7f3ed;
-        border-top: 2px solid var(--border);
-        padding: 2vh 5vw;
-        margin-top: 0;
-        display: grid;
-        grid-template-areas: 
-          "shoulders shoulders"
-          "dpad actions"
-          "meta meta";
-        grid-template-rows: 60px 1fr 60px;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        align-items: center;
-      }
-
-      .gba-shell:fullscreen .shoulder-btn {
-        background: #fff;
-        border: 1px solid var(--border);
-        color: var(--text);
-      }
-
-      .gba-shell:fullscreen .joystick-knob {
-        background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-        border: 2px solid var(--border);
-      }
-
-      .gba-shell:fullscreen .action-btn {
-        border-width: 4px;
-        box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-      }
-
-      .gba-shell:fullscreen .meta-btn {
-        background: #fff;
-        color: var(--text);
-        border: 1px solid var(--border);
-      }
-    }
     }
 
     /* ─── INSTRUCTIONS MODAL ─────────────────────────────────────── */
@@ -1339,58 +1259,72 @@
     <!-- EMULATOR VIEW -->
     <main id="view-emulator" class="view">
       <div class="stage">
-        <!-- LEFT: GBA SHELL -->
+        <!-- GBA EMULATOR SHELL -->
         <div class="gba-shell" id="gba-shell">
-          <div class="screen-bezel">
-            <div class="screen-label">GAME BOY ADVANCE</div>
-            <div class="screen-wrap" style="aspect-ratio: 3/2; width: 100%; max-width: 100vw; max-height: 100vh; position: relative;">
-              <canvas id="gba-canvas" width="240" height="160" style="width: 100%; height: 100%; object-fit: contain;"></canvas>
-              <div class="scanlines"></div>
-              <div class="screen-glow"></div>
-              <div class="screen-splash" id="screen-splash">
-                <div class="splash-content">
-                  <div class="loading-icon">🕹️</div>
-                  <div class="splash-text">System IDLE</div>
-                  <div class="splash-subtext">Insert ROM to begin...</div>
+          <div id="gba-app" class="app-layout">
+            
+            <!-- TOP: SCREEN ZONE -->
+            <div class="screen-zone">
+              <div class="screen-bezel">
+                <div class="screen-wrap">
+                  <div class="screen-label">POKEPLAY ARCADE <span>// 32-BIT GBA CORE</span></div>
+                  <div id="gba-canvas-container" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                    <canvas id="gba-canvas" width="240" height="160"></canvas>
+                  </div>
+                  <!-- Splash/Flash Overlay -->
+                  <div class="screen-splash" id="screen-splash">
+                    <div class="loading-icon">🕹️</div>
+                    <div class="splash-text">System IDLE</div>
+                    <div class="splash-subtext">Insert ROM to begin...</div>
+                  </div>
+                  <div id="joystick-overlay" class="joystick-base" style="pointer-events:none;">
+                    <div id="joystick-knob-canvas" class="joystick-knob" style="display:none"></div>
+                  </div>
                 </div>
               </div>
-              <div id="joystick-overlay" class="joystick-base" style="pointer-events:none;">
-                <div id="joystick-knob-canvas" class="joystick-knob" style="display:none"></div>
+            </div>
+
+            <!-- BOTTOM: CONTROL ZONE (Grid-Based) -->
+            <div class="control-zone gba-controls">
+              <!-- Row 1: Shoulders -->
+              <div class="shoulder-row">
+                <div class="shoulder-btn btn-l" data-key="a" id="btn-l">L</div>
+                <div class="help-btn" onclick="toggleControlsModal()">? HELP</div>
+                <div class="shoulder-btn btn-r" data-key="s" id="btn-r">R</div>
+              </div>
+
+              <!-- Row 2: Main Deck Grid -->
+              <div class="main-deck">
+                <!-- Left: D-Pad -->
+                <div class="dpad-col">
+                  <div class="dpad">
+                    <div class="dpad-btn dpad-up"    data-key="ArrowUp"    id="dp-up">▲</div>
+                    <div class="dpad-btn dpad-down"  data-key="ArrowDown"  id="dp-down">▼</div>
+                    <div class="dpad-btn dpad-left"  data-key="ArrowLeft"  id="dp-left">◀</div>
+                    <div class="dpad-btn dpad-right" data-key="ArrowRight" id="dp-right">▶</div>
+                    <div class="dpad-center"></div>
+                  </div>
+                  <div id="joystick-base" class="joystick-base" style="display:none">
+                    <div id="joystick-knob" class="joystick-knob"></div>
+                  </div>
+                </div>
+
+                <!-- Center: Meta -->
+                <div class="meta-col">
+                  <div class="meta-btn" data-key="Backspace" id="btn-sel">SELECT</div>
+                  <div class="meta-btn" id="btn-mode" onclick="toggleControlLayout()">🕹️ JOY</div>
+                  <div class="meta-btn" data-key="Enter"     id="btn-sta">START</div>
+                </div>
+
+                <!-- Right: Actions -->
+                <div class="action-col">
+                  <div class="action-btn btn-b" data-key="x" id="btn-b">B</div>
+                  <div class="action-btn btn-a" data-key="z" id="btn-a">A</div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="gba-controls">
-            <div id="joystick-base" class="joystick-base">
-              <div id="joystick-knob" class="joystick-knob" style="display:none"></div>
-            </div>
-
-            <div class="dpad">
-              <div class="dpad-btn dpad-up"    data-key="ArrowUp"    id="dp-up">▲</div>
-              <div class="dpad-btn dpad-down"  data-key="ArrowDown"  id="dp-down">▼</div>
-              <div class="dpad-btn dpad-left"  data-key="ArrowLeft"  id="dp-left">◀</div>
-              <div class="dpad-btn dpad-right" data-key="ArrowRight" id="dp-right">▶</div>
-              <div class="dpad-center"></div>
-            </div>
-
-            <div class="center-cluster">
-              <div class="shoulder-btns">
-                <div class="shoulder-btn" data-key="a" id="btn-l">L</div>
-                <div class="shoulder-btn" onclick="toggleControlsModal()" style="background:var(--accent); color:white; border:none;">? HELP</div>
-                <div class="shoulder-btn" data-key="s" id="btn-r">R</div>
-              </div>
-              <div class="start-select">
-                <div class="meta-btn" data-key="Backspace" id="btn-sel">SELECT</div>
-                <div class="meta-btn" id="btn-mode" onclick="toggleControlLayout()">🕹️ JOY</div>
-                <div class="meta-btn" data-key="Enter"     id="btn-sta">START</div>
-              </div>
-            </div>
-
-            <div class="action-btns">
-              <div class="action-btn btn-b" data-key="x" id="btn-b">B</div>
-              <div class="action-btn btn-a" data-key="z" id="btn-a">A</div>
-            </div>
-          </div>
+          </div> <!-- /app-layout -->
         </div>
 
         <!-- RIGHT: SIDEBAR -->
