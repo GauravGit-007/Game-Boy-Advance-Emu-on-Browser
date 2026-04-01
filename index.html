@@ -1025,6 +1025,41 @@
       
       .sidebar { display: none !important; }
       .stage { padding: 0 !important; margin: 0 !important; display: block !important; max-width: none !important; }
+
+      /* Mobile ROM Upload Overlay */
+      .mobile-rom-overlay {
+        position: absolute !important; inset: 0 !important; z-index: 50 !important;
+        display: flex !important; flex-direction: column !important;
+        align-items: center !important; justify-content: center !important;
+        gap: 16px; background: rgba(0,0,0,0.92) !important;
+        padding: 20px !important;
+      }
+      .mobile-rom-overlay.hidden { display: none !important; }
+      .mobile-rom-overlay .rom-upload-btn {
+        padding: 14px 28px; border-radius: 14px;
+        background: linear-gradient(135deg, #ff9f43, #ee5253);
+        color: #fff; font-family: var(--pixel); font-size: 11px;
+        border: none; cursor: pointer; letter-spacing: 1px;
+      }
+      .mobile-rom-overlay .rom-start-btn {
+        padding: 14px 40px; border-radius: 14px;
+        background: var(--green); color: #fff;
+        font-family: var(--pixel); font-size: 12px;
+        border: none; cursor: pointer; letter-spacing: 1px;
+        display: none;
+      }
+      .mobile-rom-overlay .rom-start-btn.ready { display: block; }
+      .mobile-rom-overlay .rom-file-name {
+        color: var(--amber); font-family: var(--pixel); font-size: 9px;
+        text-align: center; word-break: break-all;
+      }
+      .mobile-rom-overlay .rom-back-btn {
+        padding: 10px 20px; border-radius: 10px;
+        background: rgba(255,255,255,0.1); color: #fff;
+        font-family: var(--pixel); font-size: 9px;
+        border: 1px solid rgba(255,255,255,0.2); cursor: pointer;
+        margin-top: 8px;
+      }
       
       #gba-shell { 
         width: 100vw !important; height: 100svh !important; 
@@ -1110,19 +1145,18 @@
       
       /* CSS Custom Props for scaling */
       .control-zone {
-        --btn-unit: min(vw, svh);
-        --dpad-size: clamp(80px, 22vw, 120px);
+        --dpad-size: clamp(100px, 28vw, 140px);
         --dpad-btn: calc(var(--dpad-size) / 3);
-        --ab-size: clamp(50px, 13vw, 72px);
-        --joy-size: clamp(80px, 22vw, 120px);
-        --joy-knob: clamp(36px, 10vw, 54px);
-        --shoulder-h: clamp(32px, 5.5svh, 48px);
-        --shoulder-w: clamp(80px, 22vw, 130px);
-        --meta-w: clamp(58px, 16vw, 80px);
-        --meta-h: clamp(24px, 3.5svh, 34px);
-        --font-sm: clamp(7px, 1.8vw, 10px);
-        --font-md: clamp(10px, 2.5vw, 16px);
-        --gap: clamp(4px, 1.5vw, 12px);
+        --ab-size: clamp(60px, 16vw, 80px);
+        --joy-size: clamp(100px, 28vw, 140px);
+        --joy-knob: clamp(44px, 12vw, 60px);
+        --shoulder-h: clamp(36px, 6svh, 52px);
+        --shoulder-w: clamp(90px, 28vw, 150px);
+        --meta-w: clamp(64px, 18vw, 90px);
+        --meta-h: clamp(28px, 4svh, 38px);
+        --font-sm: clamp(8px, 2.2vw, 12px);
+        --font-md: clamp(14px, 3.5vw, 20px);
+        --gap: clamp(6px, 2vw, 14px);
       }
 
       .shoulder-row {
@@ -1358,6 +1392,16 @@
             
             <!-- TOP: SCREEN ZONE -->
             <div class="screen-zone">
+              <!-- Mobile ROM Upload Overlay -->
+              <div class="mobile-rom-overlay" id="mobile-rom-overlay">
+                <div style="font-size:48px; margin-bottom:8px;">🎮</div>
+                <div style="color:#fff; font-family:var(--pixel); font-size:12px; letter-spacing:2px;">LOAD YOUR ROM</div>
+                <div style="color:var(--text-dim); font-size:11px; text-align:center;">Select a .gba file to start playing</div>
+                <button class="rom-upload-btn" onclick="document.getElementById('rom-input').click()">📂 CHOOSE FILE</button>
+                <div class="rom-file-name" id="mobile-rom-name"></div>
+                <button class="rom-start-btn" id="mobile-start-btn" onclick="startGame()">▶ START GAME</button>
+                <button class="rom-back-btn" onclick="switchView('view-home')">⌂ BACK HOME</button>
+              </div>
               <div class="screen-bezel">
                 <div class="screen-wrap">
                   <div class="screen-label">POKEPLAY ARCADE <span>// 32-BIT GBA CORE</span></div>
@@ -1677,6 +1721,19 @@
     const savedLayout = localStorage.getItem('pokeplay_control_mode') || 'mode-dpad';
     document.getElementById('gba-shell').classList.add(savedLayout);
     updateLayoutToggleButton();
+
+    // Clean up when fullscreen is exited (e.g. pressing back on mobile)
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        // Exited fullscreen - make sure body class is correct for current view
+        const emuView = document.getElementById('view-emulator');
+        if (emuView && emuView.classList.contains('active')) {
+          document.body.classList.add('emulator-active');
+        } else {
+          document.body.classList.remove('emulator-active');
+        }
+      }
+    });
   });
 
   function switchView(viewId) {
@@ -1722,9 +1779,7 @@
       switchView('view-emulator');
       setTimeout(() => {
         startGame();
-        // Smart Fullscreen for Mobile/Tablet
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile) toggleFullscreen();
+        // No auto-fullscreen - Handheld Engine already fills the screen
       }, 500);
     } catch(e) {
       showToast('Fetch failed.', 'error');
@@ -1762,6 +1817,13 @@
     document.getElementById('rom-name').textContent = '📦 ' + name;
     document.getElementById('rom-zone').classList.add('has-rom');
     document.getElementById('start-btn').disabled = false;
+    
+    // Update Mobile Overlay
+    const mobileName = document.getElementById('mobile-rom-name');
+    const mobileStart = document.getElementById('mobile-start-btn');
+    if (mobileName) mobileName.textContent = '📦 ' + name;
+    if (mobileStart) mobileStart.classList.add('ready');
+
     setStatus('ROM ready — press START GAME', 'idle');
     showToast('ROM loaded: ' + name, 'success');
   }
@@ -1776,6 +1838,8 @@
       isRunning = true;
       isPaused = false;
       document.getElementById('screen-splash').classList.add('hidden');
+      const mobileOverlay = document.getElementById('mobile-rom-overlay');
+      if (mobileOverlay) mobileOverlay.classList.add('hidden');
       ['btn-pause','btn-reset','btn-fs'].forEach(id => document.getElementById(id).disabled = false);
       setStatus('Running: ' + romName, 'running');
       if (gba) gba.multiplier = currentSpeed; 
