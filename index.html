@@ -1143,20 +1143,44 @@
 
       /* ── Control Components (Fluid Sizing) ── */
       
-      /* CSS Custom Props for scaling */
-      .control-zone {
-        --dpad-size: clamp(100px, 28vw, 140px);
-        --dpad-btn: calc(var(--dpad-size) / 3);
-        --ab-size: clamp(60px, 16vw, 80px);
-        --joy-size: clamp(100px, 28vw, 140px);
-        --joy-knob: clamp(44px, 12vw, 60px);
-        --shoulder-h: clamp(36px, 6svh, 52px);
-        --shoulder-w: clamp(90px, 28vw, 150px);
-        --meta-w: clamp(64px, 18vw, 90px);
-        --meta-h: clamp(28px, 4svh, 38px);
-        --font-sm: clamp(8px, 2.2vw, 12px);
-        --font-md: clamp(14px, 3.5vw, 20px);
-        --gap: clamp(6px, 2vw, 14px);
+      /* ── Control Components (Strict Device Isolation) ── */
+      
+      /* 1. MOBILE SMARTPHONES (< 600px) */
+      @media (max-width: 599px) {
+        .control-zone {
+          /* Aggressive sizing tailored for thumbs */
+          --dpad-size: 34vw;
+          --dpad-btn: calc(var(--dpad-size) / 3);
+          --ab-size: 20vw;
+          --joy-size: 34vw;
+          --joy-knob: 14vw;
+          --shoulder-h: 12vw;
+          --shoulder-w: 32vw;
+          --meta-w: 20vw;
+          --meta-h: 8vw;
+          --font-sm: 2.8vw;
+          --font-md: 4.8vw;
+          --gap: 3vw;
+        }
+      }
+
+      /* 2. TABLETS (600px - 1024px) */
+      @media (min-width: 600px) {
+        .control-zone {
+          /* Fixed, ergonomic sizing for dual-hand wide grip */
+          --dpad-size: 150px;
+          --dpad-btn: calc(var(--dpad-size) / 3);
+          --ab-size: 80px;
+          --joy-size: 150px;
+          --joy-knob: 60px;
+          --shoulder-h: 50px;
+          --shoulder-w: 150px;
+          --meta-w: 80px;
+          --meta-h: 36px;
+          --font-sm: 12px;
+          --font-md: 20px;
+          --gap: 16px;
+        }
       }
 
       .shoulder-row {
@@ -1240,11 +1264,6 @@
       #gba-shell.mode-joystick .dpad-col .joystick-base { display: block !important; }
       #gba-shell.mode-dpad .dpad-col .dpad { display: block !important; }
       #gba-shell.mode-dpad .dpad-col .joystick-base { display: none !important; }
-
-      /* ── Tablet Scale ── */
-      @media (min-width: 600px) {
-        .shoulder-row { height: clamp(40px, 6svh, 56px); }
-      }
     }
 
     /* ─── INSTRUCTIONS MODAL ─────────────────────────────────────── */
