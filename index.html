@@ -1106,60 +1106,97 @@
         }
       }
 
-      /* ── Control Components ── */
+      /* ── Control Components (Fluid Sizing) ── */
+      
+      /* CSS Custom Props for scaling */
+      .control-zone {
+        --btn-unit: min(vw, svh);
+        --dpad-size: clamp(80px, 22vw, 120px);
+        --dpad-btn: calc(var(--dpad-size) / 3);
+        --ab-size: clamp(50px, 13vw, 72px);
+        --joy-size: clamp(80px, 22vw, 120px);
+        --joy-knob: clamp(36px, 10vw, 54px);
+        --shoulder-h: clamp(32px, 5.5svh, 48px);
+        --shoulder-w: clamp(80px, 22vw, 130px);
+        --meta-w: clamp(58px, 16vw, 80px);
+        --meta-h: clamp(24px, 3.5svh, 34px);
+        --font-sm: clamp(7px, 1.8vw, 10px);
+        --font-md: clamp(10px, 2.5vw, 16px);
+        --gap: clamp(4px, 1.5vw, 12px);
+      }
+
       .shoulder-row {
-        flex-shrink: 0; height: 44px;
+        flex-shrink: 0; height: var(--shoulder-h);
         display: flex; justify-content: space-between; align-items: center;
-        padding: 0 8px;
+        padding: 0 var(--gap);
       }
       .shoulder-btn {
-        width: clamp(80px, 22vw, 120px); height: clamp(32px, 7vw, 40px);
+        width: var(--shoulder-w); height: var(--shoulder-h);
         background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 8px; color: #fff; font-weight: bold; font-size: 11px;
+        border-radius: clamp(6px, 1.5vw, 10px); color: #fff; font-weight: bold; 
+        font-size: var(--font-sm);
         display: flex; align-items: center; justify-content: center;
       }
-      .help-btn { opacity: 0.4; font-size: 9px; color: #fff; cursor: pointer; }
+      .help-btn { opacity: 0.4; font-size: var(--font-sm); color: #fff; cursor: pointer; }
 
       .dpad-col {
         display: flex; justify-content: center; align-items: center;
-        position: relative; min-height: 100px;
+        position: relative;
       }
-      .meta-col { display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; }
+      /* D-Pad scaled */
+      .dpad-col .dpad {
+        position: relative;
+        width: var(--dpad-size) !important; height: var(--dpad-size) !important;
+      }
+      .dpad-col .dpad .dpad-btn {
+        width: var(--dpad-btn) !important; height: var(--dpad-btn) !important;
+        font-size: var(--font-sm) !important;
+      }
+      .dpad-col .dpad .dpad-up    { top: 0;                left: var(--dpad-btn); }
+      .dpad-col .dpad .dpad-down  { bottom: 0;             left: var(--dpad-btn); }
+      .dpad-col .dpad .dpad-left  { top: var(--dpad-btn);  left: 0; }
+      .dpad-col .dpad .dpad-right { top: var(--dpad-btn);  right: 0; }
+      .dpad-col .dpad .dpad-center {
+        top: var(--dpad-btn); left: var(--dpad-btn);
+        width: var(--dpad-btn) !important; height: var(--dpad-btn) !important;
+      }
+
+      .meta-col { display: flex; flex-direction: column; gap: var(--gap); align-items: center; justify-content: center; }
       .meta-btn { 
-        width: 68px; height: 28px; border-radius: 100px; background: #2a3b5a; 
-        color: #8a9fc4; font-size: 8px; font-weight: bold;
+        width: var(--meta-w); height: var(--meta-h); border-radius: 100px; background: #2a3b5a; 
+        color: #8a9fc4; font-size: var(--font-sm); font-weight: bold;
         border: 1px solid rgba(255,255,255,0.08);
         display: flex; align-items: center; justify-content: center;
         cursor: pointer;
       }
       
       .action-col { display: flex; justify-content: center; align-items: center; position: relative; }
-      .action-btn { 
-        width: clamp(52px, 14vw, 68px); height: clamp(52px, 14vw, 68px); 
+      .action-col .action-btn { 
+        width: var(--ab-size); height: var(--ab-size); 
         border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-weight: bold; font-size: 18px; color: #fff;
+        font-weight: bold; font-size: var(--font-md); color: #fff;
         text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         cursor: pointer;
       }
-      .action-col .btn-b { background: #b01a1a; margin-top: 25px; margin-right: -8px; border: 3px solid #8a1515; }
-      .action-col .btn-a { background: #1a7ab0; margin-bottom: 25px; border: 3px solid #155e8a; }
+      .action-col .btn-b { background: #b01a1a; margin-top: clamp(15px, 4vw, 30px); margin-right: clamp(-12px, -2vw, -6px); border: 3px solid #8a1515; }
+      .action-col .btn-a { background: #1a7ab0; margin-bottom: clamp(15px, 4vw, 30px); border: 3px solid #155e8a; }
 
       /* ── Joystick / D-Pad Toggle ── */
-      .dpad-col .dpad { position: relative; }
       .dpad-col .joystick-base {
         position: relative !important;
-        width: 96px !important; height: 96px !important;
+        width: var(--joy-size) !important; height: var(--joy-size) !important;
         background: rgba(255,255,255,0.08) !important;
         border-radius: 50% !important;
         border: 2px solid rgba(255,255,255,0.15) !important;
       }
       .dpad-col .joystick-base .joystick-knob {
-        width: 44px !important; height: 44px !important;
+        width: var(--joy-knob) !important; height: var(--joy-knob) !important;
         background: radial-gradient(circle at 35% 35%, #556, #333) !important;
         border-radius: 50% !important;
         position: absolute !important;
-        top: 26px !important; left: 26px !important;
-        /* NO transform here - JS controls transform for movement */
+        /* Center: (joy-size - joy-knob) / 2, handled via calc */
+        top: calc((var(--joy-size) - var(--joy-knob)) / 2) !important;
+        left: calc((var(--joy-size) - var(--joy-knob)) / 2) !important;
         border: 2px solid rgba(255,255,255,0.2) !important;
         display: block !important;
         touch-action: none !important;
@@ -1172,8 +1209,7 @@
 
       /* ── Tablet Scale ── */
       @media (min-width: 600px) {
-        .shoulder-row { height: 50px; }
-        .main-deck { transform: scale(1.2); }
+        .shoulder-row { height: clamp(40px, 6svh, 56px); }
       }
     }
 
