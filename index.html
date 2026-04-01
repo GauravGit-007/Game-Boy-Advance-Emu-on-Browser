@@ -1109,9 +1109,16 @@
       .btn-a { background: #1a7ab0; margin-bottom: 30px; border: 4px solid #155e8a; }
 
       /* Visual Fixes */
-      .screen-zone canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+      .screen-zone canvas { width: 100%; height: 100%; max-height: 100%; object-fit: contain; }
       .screen-bezel, .screen-wrap { background: transparent !important; padding: 0 !important; border: none !important; box-shadow: none !important; }
       .screen-label { display: none !important; }
+
+      /* Joystick / Dpad Toggles */
+      #gba-shell.mode-joystick .dpad { display: none !important; }
+      #gba-shell.mode-joystick #joystick-base { display: block !important; }
+      #gba-shell.mode-dpad .dpad { display: block !important; }
+      #gba-shell.mode-dpad #joystick-base { display: none !important; }
+
 
       /* Tablet Specific Scale */
       @media (min-width: 481px) {
@@ -1581,8 +1588,9 @@
     initOnScreenControls();
     initRomInput();
     
-    const savedLayout = localStorage.getItem('pokeplay_control_mode') || 'mode-joystick';
-    document.body.classList.add(savedLayout);
+    const savedLayout = localStorage.getItem('pokeplay_control_mode') || 'mode-dpad';
+    document.getElementById('gba-shell').classList.add(savedLayout);
+    updateLayoutToggleButton();
   });
 
   function switchView(viewId) {
@@ -1986,7 +1994,7 @@
 
     base.addEventListener('pointerdown', (e) => {
       const shell = document.getElementById('gba-shell');
-      if (!document.fullscreenElement || !shell.classList.contains('mode-joystick')) return;
+      if (!shell.classList.contains('mode-joystick')) return;
       isDragging = true;
       base.setPointerCapture(e.pointerId);
       handleJoystick(e);
