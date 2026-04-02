@@ -1102,6 +1102,11 @@
       /* Only lock scroll when emulator is active */
       body.emulator-active { overflow: hidden !important; position: fixed; width: 100%; height: 100%; touch-action: none !important; }
       
+      /* GPU PERFORMANCE OPTIMIZATIONS FOR MOBILE GAMEPLAY */
+      body.emulator-active::before { display: none !important; } /* Kill heavy screen-wide radial gradients */
+      body.emulator-active header { display: none !important; }  /* Kill heavy blur backdrop filters */
+      body.emulator-active * { box-shadow: none !important; text-shadow: none !important; animation: none !important; } /* Nuke infinite pulses, shadows */
+      
       .sidebar { display: none !important; }
       .stage { padding: 0 !important; margin: 0 !important; display: block !important; max-width: none !important; }
 
