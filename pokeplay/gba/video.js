@@ -111,9 +111,7 @@ GameBoyAdvanceVideo.prototype.updateTimers = function(cpu) {
 			switch (this.vcount) {
 			case this.VERTICAL_PIXELS:
 				this.inVblank = true;
-				if (!this.skipDraw) {
-					this.renderPath.finishDraw(this);
-				}
+				this.renderPath.finishDraw(this);
 				this.nextVblankIRQ = this.nextEvent + this.TOTAL_LENGTH;
 				this.cpu.mmu.runVblankDmas();
 				if (this.vblankIRQ) {

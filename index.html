@@ -1579,7 +1579,6 @@
         <div class="logo-text">POKE<span>PLAY</span> ARCADE</div>
       </div>
       <div style="display:flex; align-items:center; gap:16px;">
-        <button class="pc-top-btn" id="fps-toggle-btn" onclick="toggleFPS()">⚡ SHOW FPS</button>
         <button class="pc-top-btn" onclick="toggleControlsModal()">🎮 CONTROLS / KEY BINDING</button>
         <div class="header-badges">
           <div class="badge badge-gba" style="cursor:pointer;" onclick="switchView('view-emulator')">ADVANCE</div>
@@ -1671,8 +1670,6 @@
                   <div id="joystick-overlay" class="joystick-base" style="pointer-events:none;">
                     <div id="joystick-knob-canvas" class="joystick-knob" style="display:none"></div>
                   </div>
-                  <!-- FPS Counter Overlay -->
-                  <div id="fps-display" style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.65); color:var(--green); padding:2px 8px; font-family:var(--pixel); font-size:8px; border-radius:4px; border:1px solid rgba(16,172,132,0.3); display:none; pointer-events:none; z-index:100; backdrop-filter:blur(4px);">60 FPS</div>
                 </div>
               </div>
             </div>
@@ -2089,22 +2086,6 @@
     document.getElementById('modal-controls').classList.toggle('active');
   }
 
-  function toggleFPS() {
-    if (!gba) return;
-    gba.showFPS = !gba.showFPS;
-    const disp = document.getElementById('fps-display');
-    const btn = document.getElementById('fps-toggle-btn');
-    if (gba.showFPS) {
-        disp.style.display = 'block';
-        btn.textContent = '⚡ HIDE FPS';
-        btn.style.color = 'var(--green)';
-    } else {
-        disp.style.display = 'none';
-        btn.textContent = '⚡ SHOW FPS';
-        btn.style.color = '';
-    }
-  }
-
   function toggleSidebar() {
     const mobileOverlay = document.getElementById('mobile-rom-overlay');
     if (mobileOverlay) {
@@ -2120,13 +2101,6 @@
       gba.setCanvas(canvas);
       gba.setBios(biosBuffer || new ArrayBuffer(16384));
       gba.logLevel = GBA.LOG_ERROR;
-      
-      // Hook the FPS reporter to the UI
-      gba.reportFPS = (fps) => {
-          const fpsDisp = document.getElementById('fps-display');
-          if (fpsDisp) fpsDisp.textContent = fps + ' FPS';
-      };
-      
       return true;
     } catch (e) { return false; }
   }

@@ -2,14 +2,13 @@ function GameBoyAdvanceAudio() {
 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
 	if (window.AudioContext) {
 		var self = this;
-		// Use dynamic latency hint for better responsiveness on capable devices
-		const isMobile = window.innerWidth <= 1024;
+		// High stability latency hint for mobile
 		this.context = new AudioContext({ 
-			latencyHint: isMobile ? 'balanced' : 'interactive' 
+			latencyHint: 'balanced' 
 		});
 		
-		// Use smaller buffer for mobile to reduce CPU load and latency
-		this.bufferSize = isMobile ? 1024 : 2048; 
+		// Use larger buffer for stability (4096 is safe default)
+		this.bufferSize = 4096; 
 		this.maxSamples = this.bufferSize << 2;
 		this.buffers = [new Float32Array(this.maxSamples), new Float32Array(this.maxSamples)];
 		this.sampleMask = this.maxSamples - 1;

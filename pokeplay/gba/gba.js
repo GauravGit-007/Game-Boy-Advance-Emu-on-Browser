@@ -73,16 +73,6 @@ function GameBoyAdvance() {
 	this.video.vblankCallback = function() {
 		self.seenFrame = true;
 	};
-
-	// Performance / Timing variables
-	this.lastTime = 0;
-	this.accumulatedTime = 0;
-	this.targetFrameTime = 1000 / 60.1; // GBA target is ~60fps
-	this.maxFrameSkip = 3;
-	this.showFPS = false;
-	this.fpsCounter = 0;
-	this.actualFPS = 0;
-	this.lastFPSUpdate = 0;
 };
 
 GameBoyAdvance.prototype.setCanvas = function(canvas) {
@@ -171,8 +161,7 @@ GameBoyAdvance.prototype.pause = function() {
 	}
 };
 
-GameBoyAdvance.prototype.advanceFrame = function(skipDraw) {
-	this.video.skipDraw = !!skipDraw;
+GameBoyAdvance.prototype.advanceFrame = function() {
 	this.step();
 	if (this.seenSave) {
 		if (!this.mmu.saveNeedsFlush()) {
@@ -191,49 +180,24 @@ GameBoyAdvance.prototype.runStable = function() {
 	if (this.queue) return;
 	var self = this;
 	this.paused = false;
-	this.lastTime = performance.now();
-	this.accumulatedTime = 0;
-	this.fpsCounter = 0;
-	this.lastFPSUpdate = this.lastTime;
-	
 	this.audio.pause(false);
 
 	var runFunc = function() {
-		if (self.paused) return;
+		if (self.paused) {
+			self.queue = null;
+			return;
+		}
+		
+		// Run a single frame per tick (maximizes browser responsiveness for audio)
+		for (var i = 0; i < self.multiplier; ++i) {
+			self.advanceFrame();
+		}
+		
+		// Priority given to audio and input handling by returning to event loop immediately
 		self.queue = requestAnimationFrame(runFunc);
-
-		var now = performance.now();
-		var dt = now - self.lastTime;
-		self.lastTime = now;
-
-		// Cap dt to prevent "spiral of death" after long pauses/backgrounding
-		if (dt > 100) dt = 100; 
-
-		self.accumulatedTime += dt * self.multiplier;
-
-		var framesToRun = Math.floor(self.accumulatedTime / self.targetFrameTime);
-		if (framesToRun > 0) {
-			for (var i = 0; i < framesToRun; i++) {
-				// Only draw the LAST frame if we are running multiple frames (frame skip)
-				var skipDraw = (i < framesToRun - 1) && (i < self.maxFrameSkip);
-				self.advanceFrame(skipDraw);
-				self.accumulatedTime -= self.targetFrameTime;
-				self.fpsCounter++;
-			}
-		}
-
-		// Update FPS display every second
-		if (now - self.lastFPSUpdate > 1000) {
-			self.actualFPS = Math.round((self.fpsCounter * 1000) / (now - self.lastFPSUpdate));
-			self.fpsCounter = 0;
-			self.lastFPSUpdate = now;
-			if (self.showFPS && self.reportFPS) {
-				self.reportFPS(self.actualFPS);
-			}
-		}
 	};
 
-	self.queue = requestAnimationFrame(runFunc);
+	this.queue = requestAnimationFrame(runFunc);
 };
 
 GameBoyAdvance.prototype.setSavedata = function(data) {
