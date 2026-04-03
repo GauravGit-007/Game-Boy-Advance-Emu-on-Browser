@@ -1210,39 +1210,32 @@
         background: #000 !important;
       }
 
-      /* Screen & Bezel: fill the zone completely */
+      /* ════════════════════════════════════════════════════════════════
+         SCREEN & BEZEL — Fill the zone, no decorations
+         ════════════════════════════════════════════════════════════════ */
       .screen-zone {
         display: flex; align-items: center; justify-content: center;
         background: #000;
         overflow: hidden;
-      }
-      body.edit-mode .app-layout, body.edit-mode .screen-zone, body.edit-mode .control-zone { 
-        overflow: visible !important; 
+        position: relative;
       }
       .screen-zone .screen-bezel {
         width: 100%; height: 100%;
-        background: #000 !important; padding: 0 !important;
-        border: none !important; box-shadow: none !important;
-        border-radius: 0 !important; margin: 0 !important;
+        background: #000; padding: 0;
+        border: none; box-shadow: none;
+        border-radius: 0; margin: 0;
         display: flex; align-items: center; justify-content: center;
       }
       .screen-zone .screen-wrap {
         width: 100%; height: 100%;
-        background: #000 !important; padding: 0 !important;
-        border: none !important; box-shadow: none !important;
-        border-radius: 0 !important; aspect-ratio: auto !important;
+        background: #000; padding: 0;
+        border: none; box-shadow: none;
+        border-radius: 0; aspect-ratio: auto;
+        position: relative;
       }
       .screen-zone #gba-canvas-container {
         width: 100%; height: 100%;
         position: relative;
-        z-index: 5;
-        transition: transform 0.1s ease-out;
-      }
-      body.edit-mode #gba-canvas-container {
-        z-index: 1000 !important;
-        pointer-events: auto !important;
-        background: rgba(42, 59, 90, 0.2);
-        box-shadow: 0 0 0 2px var(--amber);
       }
       .screen-zone canvas {
         width: 100%; height: 100%;
@@ -1252,76 +1245,106 @@
       .screen-zone .screen-label { display: none !important; }
       .screen-zone .screen-splash { border-radius: 0 !important; }
 
-      /* ── 1. PORTRAIT ── */
+      /* ════════════════════════════════════════════════════════════════
+         PORTRAIT MODE — Screen on top, controls on bottom
+         ════════════════════════════════════════════════════════════════ */
       @media (orientation: portrait) {
-        .app-layout { flex-direction: column !important; }
-        .screen-zone { flex: 0 0 58svh !important; width: 100% !important; }
+        .app-layout {
+          flex-direction: column !important;
+          display: flex !important;
+        }
+        .screen-zone {
+          flex: 0 0 55svh !important;
+          width: 100% !important;
+        }
         .control-zone {
-          flex: 0 0 42svh !important; width: 100% !important;
+          flex: 1 !important;
+          width: 100% !important;
           background: linear-gradient(180deg, #1a2a47 0%, #0d1526 100%) !important;
-          display: flex !important; flex-direction: column !important;
+          display: flex !important;
+          flex-direction: column !important;
           padding: 6px 10px 10px !important;
-          position: relative; z-index: 10;
+          position: relative;
+          z-index: 10;
           touch-action: none !important;
+        }
+        .shoulder-row {
+          flex-shrink: 0;
         }
         .main-deck {
           display: grid !important;
           grid-template-columns: 2fr 1fr 2fr !important;
-          flex: 1 !important; align-items: center !important;
+          flex: 1 !important;
+          align-items: center !important;
         }
       }
 
-      /* ── 2. LANDSCAPE ── */
+      /* ════════════════════════════════════════════════════════════════
+         LANDSCAPE MODE — True handheld: D-Pad | Screen | A/B
+         ════════════════════════════════════════════════════════════════ */
       @media (orientation: landscape) {
-        .app-layout { 
+        .app-layout {
           display: grid !important;
-          grid-template-columns: 1fr 2fr 1fr !important;
-          gap: 0 !important;
+          grid-template-columns: 25vw 1fr 25vw !important;
+          grid-template-rows: 1fr auto !important;
           width: 100vw !important;
           height: 100svh !important;
+          background: linear-gradient(135deg, #0d1526 0%, #1a2a47 100%) !important;
         }
-        .screen-zone { 
-          grid-column: 2; grid-row: 1;
-          width: 100% !important; height: 100% !important; 
+        .screen-zone {
+          grid-column: 2;
+          grid-row: 1;
+          width: 100% !important;
+          height: 100% !important;
         }
         .control-zone {
-          grid-column: 1 / span 3; grid-row: 1;
           display: contents !important;
+          background: transparent !important;
         }
         .shoulder-row {
-          position: absolute; top: 0; left: 0; width: 100%; z-index: 100;
+          position: absolute;
+          top: 4px; left: 0; width: 100%;
+          z-index: 100;
           pointer-events: none;
         }
-        .shoulder-btn, .meta-btn { pointer-events: auto; }
+        .shoulder-row > * { pointer-events: auto; }
         .main-deck {
           display: contents !important;
         }
         .dpad-col {
-          grid-column: 1; grid-row: 1;
-          display: flex !important; justify-content: center; align-items: center;
+          grid-column: 1;
+          grid-row: 1;
+          display: flex !important;
+          justify-content: center;
+          align-items: center;
+          background: rgba(13, 21, 38, 0.6);
         }
         .action-col {
-          grid-column: 3; grid-row: 1;
-          display: flex !important; justify-content: center; align-items: center;
+          grid-column: 3;
+          grid-row: 1;
+          display: flex !important;
+          justify-content: center;
+          align-items: center;
+          background: rgba(13, 21, 38, 0.6);
         }
         .meta-col {
-          grid-column: 2; grid-row: 1;
-          display: flex !important; flex-direction: row !important;
-          align-items: flex-end; justify-content: center;
-          padding-bottom: 20px;
-          pointer-events: none;
+          grid-column: 1 / span 3;
+          grid-row: 2;
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 6px 0;
+          background: rgba(13, 21, 38, 0.8);
         }
-        .meta-col .meta-btn { pointer-events: auto; }
       }
 
-      /* ── Control Components (Fluid Sizing) ── */
-      
-      /* ── Control Components (Strict Device Isolation) ── */
-      
-      /* 1. MOBILE SMARTPHONES (< 600px) */
+      /* ════════════════════════════════════════════════════════════════
+         CONTROL SIZING — Mobile Phones (<600px)
+         ════════════════════════════════════════════════════════════════ */
       @media (max-width: 599px) {
         .control-zone {
-          /* Aggressive sizing tailored for thumbs */
           --dpad-size: 34vw;
           --dpad-btn: calc(var(--dpad-size) / 3);
           --ab-size: 18vw;
@@ -1336,9 +1359,27 @@
           --gap: 3vw;
         }
       }
+      /* Landscape-specific sizing overrides (use vh for landscape) */
+      @media (orientation: landscape) and (max-height: 500px) {
+        :root {
+          --dpad-size: 28vh;
+          --dpad-btn: calc(var(--dpad-size) / 3);
+          --ab-size: 15vh;
+          --joy-size: 28vh;
+          --joy-knob: 12vh;
+          --shoulder-h: 8vh;
+          --shoulder-w: 20vh;
+          --meta-w: 16vh;
+          --meta-h: 5vh;
+          --font-sm: 1.6vh;
+          --font-md: 3vh;
+          --gap: 2vh;
+        }
+      }
 
-      /* 2. TABLETS (600px - 1024px) inherits from global variable set mapped above */
-
+      /* ════════════════════════════════════════════════════════════════
+         CONTROL COMPONENT STYLES
+         ════════════════════════════════════════════════════════════════ */
       .shoulder-row {
         flex-shrink: 0; height: var(--shoulder-h);
         display: flex; justify-content: space-between; align-items: center;
@@ -1347,7 +1388,7 @@
       .shoulder-btn {
         width: var(--shoulder-w); height: var(--shoulder-h);
         background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
-        border-radius: clamp(6px, 1.5vw, 10px); color: #fff; font-weight: bold; 
+        border-radius: clamp(6px, 1.5vw, 10px); color: #fff; font-weight: bold;
         font-size: var(--font-sm);
         display: flex; align-items: center; justify-content: center;
       }
@@ -1357,7 +1398,6 @@
         display: flex; justify-content: center; align-items: center;
         position: relative;
       }
-      /* D-Pad scaled */
       .dpad-col .dpad {
         position: relative;
         width: var(--dpad-size) !important; height: var(--dpad-size) !important;
@@ -1366,27 +1406,27 @@
         width: var(--dpad-btn) !important; height: var(--dpad-btn) !important;
         font-size: var(--font-sm) !important;
       }
-      .dpad-col .dpad .dpad-up    { top: 0;                left: var(--dpad-btn); }
-      .dpad-col .dpad .dpad-down  { bottom: 0;             left: var(--dpad-btn); }
-      .dpad-col .dpad .dpad-left  { top: var(--dpad-btn);  left: 0; }
-      .dpad-col .dpad .dpad-right { top: var(--dpad-btn);  right: 0; }
+      .dpad-col .dpad .dpad-up    { top: 0;               left: var(--dpad-btn); }
+      .dpad-col .dpad .dpad-down  { bottom: 0;            left: var(--dpad-btn); }
+      .dpad-col .dpad .dpad-left  { top: var(--dpad-btn); left: 0; }
+      .dpad-col .dpad .dpad-right { top: var(--dpad-btn); right: 0; }
       .dpad-col .dpad .dpad-center {
         top: var(--dpad-btn); left: var(--dpad-btn);
         width: var(--dpad-btn) !important; height: var(--dpad-btn) !important;
       }
 
       .meta-col { display: flex; flex-direction: column; gap: var(--gap); align-items: center; justify-content: center; }
-      .meta-btn { 
-        width: var(--meta-w); height: var(--meta-h); border-radius: 100px; background: #2a3b5a; 
+      .meta-btn {
+        width: var(--meta-w); height: var(--meta-h); border-radius: 100px; background: #2a3b5a;
         color: #8a9fc4; font-size: var(--font-sm); font-weight: bold;
         border: 1px solid rgba(255,255,255,0.08);
         display: flex; align-items: center; justify-content: center;
         cursor: pointer;
       }
-      
+
       .action-col { display: flex; justify-content: center; align-items: center; position: relative; }
-      .action-col .action-btn { 
-        width: var(--ab-size); height: var(--ab-size); 
+      .action-col .action-btn {
+        width: var(--ab-size); height: var(--ab-size);
         border-radius: 50%; display: flex; align-items: center; justify-content: center;
         font-weight: bold; font-size: var(--font-md); color: #fff;
         text-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -1408,7 +1448,6 @@
         background: radial-gradient(circle at 35% 35%, #556, #333) !important;
         border-radius: 50% !important;
         position: absolute !important;
-        /* Center: (joy-size - joy-knob) / 2, handled via calc */
         top: calc((var(--joy-size) - var(--joy-knob)) / 2) !important;
         left: calc((var(--joy-size) - var(--joy-knob)) / 2) !important;
         border: 2px solid rgba(255,255,255,0.2) !important;
@@ -1421,7 +1460,25 @@
       #gba-shell.mode-dpad .dpad-col .dpad { display: block !important; }
       #gba-shell.mode-dpad .dpad-col .joystick-base { display: none !important; }
 
-      /* Handheld Mode Layout (Landscape) — REMOVED redundant logic - handled by landscape grid above */
+      /* ════════════════════════════════════════════════════════════════
+         EDIT MODE — Everything becomes absolutely positioned & movable
+         ════════════════════════════════════════════════════════════════ */
+      body.edit-mode .app-layout,
+      body.edit-mode .screen-zone,
+      body.edit-mode .control-zone {
+        overflow: visible !important;
+      }
+      body.edit-mode .screen-bezel,
+      body.edit-mode .screen-wrap,
+      body.edit-mode .screen-splash {
+        pointer-events: none !important;
+      }
+      body.edit-mode #gba-canvas-container {
+        pointer-events: auto !important;
+        z-index: 1000 !important;
+        box-shadow: 0 0 0 2px var(--amber);
+        background: rgba(42, 59, 90, 0.15);
+      }
     }
 
     /* ─── INSTRUCTIONS MODAL ─────────────────────────────────────── */
@@ -2047,9 +2104,9 @@
     initEditorDragEngine();
     initRomInput();
     
-    if (localStorage.getItem('pokeplay_handheld_mode')) {
-       localStorage.removeItem('pokeplay_handheld_mode'); // Cleanup old setting
-    }
+    // Restore saved control mode (D-pad vs Joystick)
+    const savedLayout = localStorage.getItem('pokeplay_control_mode') || 'mode-dpad';
+    document.getElementById('gba-shell').classList.add(savedLayout);
     
     updateLayoutToggleButton();
 
@@ -2588,7 +2645,7 @@
   function resetCustomUI() {
     customLayoutData = {};
     localStorage.removeItem('pokeplay_custom_ui');
-    const nodes = document.querySelectorAll('.shoulder-btn, .dpad-col, .action-btn, .meta-btn');
+    const nodes = document.querySelectorAll('.shoulder-btn, .dpad-col, .action-btn, .meta-btn, #gba-canvas-container, #btn-speed-mobile');
     nodes.forEach(el => {
       el.style.transform = '';
       delete el.dataset.scale; delete el.dataset.x; delete el.dataset.y;
