@@ -1128,8 +1128,8 @@
       }
       #game-display canvas {
         width: 100% !important; height: 100% !important;
-        object-fit: contain;
-        image-rendering: auto; /* Smoother scaling on high DPI */
+        object-fit: fill; /* Allows stretching to the container dimensions */
+        image-rendering: auto;
       }
       
       .screen-label, .screen-splash { display: none !important; }
@@ -1488,9 +1488,14 @@
                     Select an element to resize,<br/>or drag it anywhere.
                   </div>
                   
-                  <div style="margin-bottom:16px; display:flex; gap:10px; align-items:center;">
-                    <span style="font-size:8px;">Size</span>
-                    <input type="range" id="edit-scale-slider" min="0.3" max="4.0" step="0.05" value="1.0" style="flex:1" oninput="updateActiveNodeScale(this.value)" />
+                  <div id="scale-controls-x" style="margin-bottom:12px; display:flex; gap:10px; align-items:center;">
+                    <span style="font-size:8px; width:45px; text-align:right;">Width</span>
+                    <input type="range" id="edit-scale-x-slider" min="0.3" max="8.0" step="0.05" value="1.0" style="flex:1" oninput="updateActiveNodeScale(this.value, 'x')" />
+                  </div>
+                  
+                  <div id="scale-controls-y" style="margin-bottom:16px; display:none; gap:10px; align-items:center;">
+                    <span style="font-size:8px; width:45px; text-align:right;">Height</span>
+                    <input type="range" id="edit-scale-y-slider" min="0.3" max="8.0" step="0.05" value="1.0" style="flex:1" oninput="updateActiveNodeScale(this.value, 'y')" />
                   </div>
 
                   <div style="display:flex; justify-content:center; gap:10px;">
@@ -2348,8 +2353,11 @@
     for (const [id, data] of Object.entries(customLayoutData)) {
       const el = document.getElementById(id);
       if (el) {
-        el.style.transform = `translate(${data.x}px, ${data.y}px) scale(${data.scale})`;
-        el.dataset.scale = data.scale; 
+        const sx = data.scaleX || data.scale || 1.0;
+        const sy = data.scaleY || data.scale || 1.0;
+        el.style.transform = `translate(${data.x}px, ${data.y}px) scale(${sx}, ${sy})`;
+        el.dataset.scaleX = sx; 
+        el.dataset.scaleY = sy;
         el.dataset.x = data.x; 
         el.dataset.y = data.y;
       }
@@ -2366,53 +2374,53 @@
       // PORTRAIT DEFAULTS (Optimized for thumb reach)
       const gameW = 240, gameH = 160;
       const gameScale = Math.min((w * 0.98) / gameW, (h * 0.4) / gameH);
-      layout['game-display'] = { x: (w - gameW)/2, y: 40, scale: gameScale };
+      layout['game-display'] = { x: (w - gameW)/2, y: 40, scaleX: gameScale, scaleY: gameScale };
 
       // D-Pad: Middle Left
-      layout['ctrl-dpad'] = { x: 25, y: h - 350, scale: 1.1 };
+      layout['ctrl-dpad'] = { x: 25, y: h - 350, scaleX: 1.1, scaleY: 1.1 };
       
       // Action Buttons: Right Side Cluster
-      layout['ctrl-btn-a'] = { x: w - 95, y: h - 340, scale: 1.1 };
-      layout['ctrl-btn-b'] = { x: w - 165, y: h - 300, scale: 1.1 };
+      layout['ctrl-btn-a'] = { x: w - 95, y: h - 340, scaleX: 1.1, scaleY: 1.1 };
+      layout['ctrl-btn-b'] = { x: w - 165, y: h - 300, scaleX: 1.1, scaleY: 1.1 };
 
       // Shoulders: Outer Bottom Corners
-      layout['ctrl-btn-l'] = { x: 15, y: h - 60, scale: 1.0 };
-      layout['ctrl-btn-r'] = { x: w - 80, y: h - 60, scale: 1.0 };
+      layout['ctrl-btn-l'] = { x: 15, y: h - 60, scaleX: 1.0, scaleY: 1.0 };
+      layout['ctrl-btn-r'] = { x: w - 80, y: h - 60, scaleX: 1.0, scaleY: 1.0 };
 
       // Meta: Bottom Center
       const metaY = h - 60;
-      layout['ctrl-btn-sel'] = { x: (w/2) - 80, y: metaY, scale: 1.0 };
-      layout['ctrl-btn-sta'] = { x: (w/2) + 5, y: metaY, scale: 1.0 };
+      layout['ctrl-btn-sel'] = { x: (w/2) - 80, y: metaY, scaleX: 1.0, scaleY: 1.0 };
+      layout['ctrl-btn-sta'] = { x: (w/2) + 5, y: metaY, scaleX: 1.0, scaleY: 1.0 };
       
-      layout['ctrl-speed']   = { x: (w/2) - 22, y: h - 140, scale: 1.0 };
-      layout['ctrl-edit']    = { x: w - 50, y: 15, scale: 1.0 };
+      layout['ctrl-speed']   = { x: (w/2) - 22, y: h - 140, scaleX: 1.0, scaleY: 1.0 };
+      layout['ctrl-edit']    = { x: w - 50, y: 15, scaleX: 1.0, scaleY: 1.0 };
 
     } else {
       // LANDSCAPE DEFAULTS (Handheld Console Style)
       const gameW = 240, gameH = 160;
       const gameScale = (h * 0.85) / gameH;
-      layout['game-display'] = { x: (w - gameW)/2, y: (h - gameH)/2, scale: gameScale };
+      layout['game-display'] = { x: (w - gameW)/2, y: (h - gameH)/2, scaleX: gameScale, scaleY: gameScale };
 
       // D-pad - Far Left
-      layout['ctrl-dpad'] = { x: 30, y: (h/2) - 30, scale: 1.0 };
+      layout['ctrl-dpad'] = { x: 30, y: (h/2) - 30, scaleX: 1.0, scaleY: 1.0 };
 
       // Action Buttons - Far Right Cluster
-      layout['ctrl-btn-a'] = { x: w - 110, y: (h/2) - 60, scale: 1.1 };
-      layout['ctrl-btn-b'] = { x: w - 190, y: (h/2) - 20, scale: 1.1 };
+      layout['ctrl-btn-a'] = { x: w - 110, y: (h/2) - 60, scaleX: 1.1, scaleY: 1.1 };
+      layout['ctrl-btn-b'] = { x: w - 190, y: (h/2) - 20, scaleX: 1.1, scaleY: 1.1 };
 
       // Shoulders - Top Corners
-      layout['ctrl-btn-l'] = { x: 30, y: 20, scale: 1.0 };
-      layout['ctrl-btn-r'] = { x: w - 100, y: 20, scale: 1.0 };
+      layout['ctrl-btn-l'] = { x: 30, y: 20, scaleX: 1.0, scaleY: 1.0 };
+      layout['ctrl-btn-r'] = { x: w - 100, y: 20, scaleX: 1.0, scaleY: 1.0 };
 
       // Meta - Center Bottom
-      layout['ctrl-btn-sel'] = { x: (w/2) - 80, y: h - 45, scale: 0.9 };
-      layout['ctrl-btn-sta'] = { x: (w/2) + 5, y: h - 45, scale: 0.9 };
+      layout['ctrl-btn-sel'] = { x: (w/2) - 80, y: h - 45, scaleX: 0.9, scaleY: 0.9 };
+      layout['ctrl-btn-sta'] = { x: (w/2) + 5, y: h - 45, scaleX: 0.9, scaleY: 0.9 };
       
-      layout['ctrl-speed']   = { x: w - 60, y: h/2 + 60, scale: 0.9 };
-      layout['ctrl-edit']    = { x: w - 50, y: 15, scale: 0.8 };
+      layout['ctrl-speed']   = { x: w - 60, y: h/2 + 60, scaleX: 0.9, scaleY: 0.9 };
+      layout['ctrl-edit']    = { x: w - 50, y: 15, scaleX: 0.8, scaleY: 0.8 };
     }
     
-    layout['ctrl-mode'] = { x: -200, y: -200, scale: 1.0 }; 
+    layout['ctrl-mode'] = { x: -200, y: -200, scaleX: 1.0, scaleY: 1.0 }; 
 
     return layout;
   }
@@ -2447,13 +2455,13 @@
       
       btnEdit.innerHTML = '⚙️'; btnEdit.style.background = ''; btnEdit.style.color = '';
       
-      if (wasPausedByEditor && gba && isRunning) {
+      if (gba && isRunning) {
         gba.runStable();
         isPaused = false;
         document.getElementById('btn-pause').textContent = '⏸ PAUSE'; 
         document.getElementById('btn-pause').classList.remove('active'); 
-        wasPausedByEditor = false;
       }
+      wasPausedByEditor = false;
 
       const key = getLayoutStorageKey();
       localStorage.setItem(key, JSON.stringify(customLayoutData));
@@ -2472,13 +2480,31 @@
     document.getElementById('edit-target-label').innerHTML = "Select an element to resize,<br/>or drag it anywhere.";
   }
 
-  function updateActiveNodeScale(val) {
+  function updateActiveNodeScale(val, axis) {
     if (!activeEditNode) return;
     const id = activeEditNode.id;
-    if (!customLayoutData[id]) customLayoutData[id] = { x: 0, y: 0, scale: 1.0 };
-    customLayoutData[id].scale = parseFloat(val);
-    activeEditNode.dataset.scale = val;
-    activeEditNode.style.transform = `translate(${customLayoutData[id].x}px, ${customLayoutData[id].y}px) scale(${val})`;
+    if (!customLayoutData[id]) customLayoutData[id] = { x: 0, y: 0, scaleX: 1.0, scaleY: 1.0 };
+    
+    const v = parseFloat(val);
+    if (id === 'game-display') {
+      if (axis === 'x') {
+        customLayoutData[id].scaleX = v;
+        activeEditNode.dataset.scaleX = v;
+      } else {
+        customLayoutData[id].scaleY = v;
+        activeEditNode.dataset.scaleY = v;
+      }
+    } else {
+      // Buttons maintains aspect ratio
+      customLayoutData[id].scaleX = v;
+      customLayoutData[id].scaleY = v;
+      activeEditNode.dataset.scaleX = v;
+      activeEditNode.dataset.scaleY = v;
+    }
+    
+    const sx = customLayoutData[id].scaleX;
+    const sy = customLayoutData[id].scaleY;
+    activeEditNode.style.transform = `translate(${customLayoutData[id].x}px, ${customLayoutData[id].y}px) scale(${sx}, ${sy})`;
   }
 
   function initEditorDragEngine() {
@@ -2503,9 +2529,24 @@
         activeEditNode = el;
         el.classList.add('edit-target-active');
         
-        const currentScale = el.dataset.scale ? parseFloat(el.dataset.scale) : 1.0;
-        document.getElementById('edit-scale-slider').parentElement.style.display = 'flex';
-        document.getElementById('edit-scale-slider').value = currentScale;
+        const sx = el.dataset.scaleX ? parseFloat(el.dataset.scaleX) : 1.0;
+        const sy = el.dataset.scaleY ? parseFloat(el.dataset.scaleY) : 1.0;
+        
+        document.getElementById('edit-scale-x-slider').parentElement.style.display = 'flex';
+        document.getElementById('edit-scale-x-slider').value = sx;
+        
+        // Only show Y stretch for Game Screen
+        if (el.id === 'game-display') {
+          document.getElementById('scale-controls-y').style.display = 'flex';
+          document.getElementById('edit-scale-y-slider').value = sy;
+          document.getElementById('scale-controls-x').querySelector('span').textContent = 'Width';
+        } else {
+          document.getElementById('scale-controls-y').style.display = 'none';
+          document.getElementById('scale-controls-x').querySelector('span').textContent = 'Size';
+          // Link Y to X for buttons to maintain aspect ratio
+          customLayoutData[el.id].scaleY = sx;
+        }
+
         document.getElementById('edit-target-label').textContent = "Selected: " + (el.id.replace('ctrl-', '').replace('game-display', 'Game Screen').toUpperCase());
 
         initialOffsetX = el.dataset.x ? parseFloat(el.dataset.x) : 0;
@@ -2550,13 +2591,14 @@
           
           const newX = initialOffsetX + dx;
           const newY = initialOffsetY + dy;
-          const scale = el.dataset.scale ? parseFloat(el.dataset.scale) : 1.0;
+          const sx = el.dataset.scaleX ? parseFloat(el.dataset.scaleX) : 1.0;
+          const sy = el.dataset.scaleY ? parseFloat(el.dataset.scaleY) : 1.0;
           
-          el.style.transform = `translate(${newX}px, ${newY}px) scale(${scale})`;
+          el.style.transform = `translate(${newX}px, ${newY}px) scale(${sx}, ${sy})`;
           el.dataset.x = newX;
           el.dataset.y = newY;
           
-          if (!customLayoutData[el.id]) customLayoutData[el.id] = { x: 0, y: 0, scale: 1.0 };
+          if (!customLayoutData[el.id]) customLayoutData[el.id] = { x: 0, y: 0, scaleX: 1.0, scaleY: 1.0 };
           customLayoutData[el.id].x = newX;
           customLayoutData[el.id].y = newY;
         }
