@@ -1212,11 +1212,13 @@
 
       /* Screen & Bezel: fill the zone completely */
       .screen-zone {
-        display: flex !important; align-items: center !important; justify-content: center !important;
-        background: #000 !important;
+        display: flex; align-items: center; justify-content: center;
+        background: #000;
         overflow: hidden;
       }
-      body.edit-mode .screen-zone { overflow: visible !important; }
+      body.edit-mode .app-layout, body.edit-mode .screen-zone, body.edit-mode .control-zone { 
+        overflow: visible !important; 
+      }
       .screen-zone .screen-bezel {
         width: 100%; height: 100%;
         background: #000 !important; padding: 0 !important;
@@ -1232,6 +1234,15 @@
       }
       .screen-zone #gba-canvas-container {
         width: 100%; height: 100%;
+        position: relative;
+        z-index: 5;
+        transition: transform 0.1s ease-out;
+      }
+      body.edit-mode #gba-canvas-container {
+        z-index: 1000 !important;
+        pointer-events: auto !important;
+        background: rgba(42, 59, 90, 0.2);
+        box-shadow: 0 0 0 2px var(--amber);
       }
       .screen-zone canvas {
         width: 100%; height: 100%;
@@ -1262,20 +1273,45 @@
 
       /* ── 2. LANDSCAPE ── */
       @media (orientation: landscape) {
-        .app-layout { flex-direction: row !important; }
-        .screen-zone { flex: 0 0 55% !important; height: 100svh !important; }
-        .control-zone {
-          flex: 0 0 45% !important; height: 100svh !important;
-          background: #0d1526 !important;
-          display: flex !important; flex-direction: column !important;
-          padding: 8px !important;
-          touch-action: none !important;
-        }
-        .main-deck {
+        .app-layout { 
           display: grid !important;
-          grid-template-columns: 1fr 1fr !important;
-          flex: 1 !important; align-items: center !important;
+          grid-template-columns: 1fr 2fr 1fr !important;
+          gap: 0 !important;
+          width: 100vw !important;
+          height: 100svh !important;
         }
+        .screen-zone { 
+          grid-column: 2; grid-row: 1;
+          width: 100% !important; height: 100% !important; 
+        }
+        .control-zone {
+          grid-column: 1 / span 3; grid-row: 1;
+          display: contents !important;
+        }
+        .shoulder-row {
+          position: absolute; top: 0; left: 0; width: 100%; z-index: 100;
+          pointer-events: none;
+        }
+        .shoulder-btn, .meta-btn { pointer-events: auto; }
+        .main-deck {
+          display: contents !important;
+        }
+        .dpad-col {
+          grid-column: 1; grid-row: 1;
+          display: flex !important; justify-content: center; align-items: center;
+        }
+        .action-col {
+          grid-column: 3; grid-row: 1;
+          display: flex !important; justify-content: center; align-items: center;
+        }
+        .meta-col {
+          grid-column: 2; grid-row: 1;
+          display: flex !important; flex-direction: row !important;
+          align-items: flex-end; justify-content: center;
+          padding-bottom: 20px;
+          pointer-events: none;
+        }
+        .meta-col .meta-btn { pointer-events: auto; }
       }
 
       /* ── Control Components (Fluid Sizing) ── */
@@ -1385,55 +1421,7 @@
       #gba-shell.mode-dpad .dpad-col .dpad { display: block !important; }
       #gba-shell.mode-dpad .dpad-col .joystick-base { display: none !important; }
 
-      /* ── Handheld Mode Layout (Landscape) ── */
-      @media (orientation: landscape) {
-        #gba-shell.mode-handheld .app-layout {
-          display: grid !important;
-          grid-template-columns: 1fr 2fr 1fr !important;
-          flex-direction: row !important;
-        }
-        #gba-shell.mode-handheld .screen-zone {
-          grid-column: 2;
-          width: 100% !important;
-        }
-        #gba-shell.mode-handheld .control-zone {
-          grid-column: 1 / span 3;
-          display: contents !important; /* Allow children to be placed in the grid */
-        }
-        #gba-shell.mode-handheld .shoulder-row {
-          position: absolute; top: 0; width: 100%; z-index: 100;
-          pointer-events: none;
-        }
-        #gba-shell.mode-handheld .shoulder-btn { pointer-events: auto; }
-        #gba-shell.mode-handheld .main-deck {
-          display: contents !important;
-        }
-        #gba-shell.mode-handheld .dpad-col {
-          grid-column: 1; grid-row: 1;
-        }
-        #gba-shell.mode-handheld .action-col {
-          grid-column: 3; grid-row: 1;
-        }
-        #gba-shell.mode-handheld .meta-col {
-          grid-column: 2; grid-row: 2;
-          flex-direction: row !important;
-          transform: translateY(-80px); /* Move Start/Select to mid-bottom */
-          z-index: 50;
-        }
-      }
-      
-      /* Edit Mode selectability fixes */
-      body.edit-mode .screen-bezel, body.edit-mode .screen-wrap {
-        pointer-events: none !important; /* Pass through to canvas container */
-      }
-      body.edit-mode #gba-canvas-container {
-        pointer-events: auto !important;
-        z-index: 100 !important;
-        background: rgba(0,0,0,0.1); /* Subtle hint */
-      }
-      body.edit-mode .screen-splash {
-        pointer-events: none !important;
-      }
+      /* Handheld Mode Layout (Landscape) — REMOVED redundant logic - handled by landscape grid above */
     }
 
     /* ─── INSTRUCTIONS MODAL ─────────────────────────────────────── */
@@ -1696,7 +1684,7 @@
                   
                   <div style="margin-bottom:16px; display:flex; gap:10px; align-items:center;">
                     <span style="font-size:8px;">Size</span>
-                    <input type="range" id="edit-scale-slider" min="0.5" max="2.0" step="0.05" value="1.0" style="flex:1" oninput="updateActiveNodeScale(this.value)" />
+                    <input type="range" id="edit-scale-slider" min="0.3" max="4.0" step="0.05" value="1.0" style="flex:1" oninput="updateActiveNodeScale(this.value)" />
                   </div>
 
                   <div style="display:flex; justify-content:center; gap:10px;">
@@ -1755,7 +1743,6 @@
                   <div class="meta-btn" data-key="Backspace" id="btn-sel">SELECT</div>
                   <div style="display:flex; gap:10px; width:100%; justify-content:center;">
                     <div class="meta-btn" id="btn-mode" onclick="toggleControlLayout()">🕹️ JOY</div>
-                    <div class="meta-btn" id="btn-handheld" onclick="toggleHandheldMode()" style="background:#3a4b6a; color:#fff">📱 HANDHELD</div>
                     <div class="meta-btn" id="btn-edit" onclick="toggleEditMode()" style="background:#2a3b5a; color:var(--amber)">⚙️ EDIT</div>
                   </div>
                   <div class="meta-btn" data-key="Enter"     id="btn-sta">START</div>
@@ -2060,12 +2047,8 @@
     initEditorDragEngine();
     initRomInput();
     
-    const savedLayout = localStorage.getItem('pokeplay_control_mode') || 'mode-dpad';
-    document.getElementById('gba-shell').classList.add(savedLayout);
-    
-    if (localStorage.getItem('pokeplay_handheld_mode') === 'true') {
-      document.getElementById('gba-shell').classList.add('mode-handheld');
-      updateHandheldButton();
+    if (localStorage.getItem('pokeplay_handheld_mode')) {
+       localStorage.removeItem('pokeplay_handheld_mode'); // Cleanup old setting
     }
     
     updateLayoutToggleButton();
@@ -2278,21 +2261,6 @@
     let nextSpeed = speeds[nextIdx];
     setSpeed(nextSpeed);
     document.getElementById('btn-speed-mobile').textContent = nextSpeed + '×';
-  }
-
-  function toggleHandheldMode() {
-    const shell = document.getElementById('gba-shell');
-    const isHandheld = shell.classList.toggle('mode-handheld');
-    localStorage.setItem('pokeplay_handheld_mode', isHandheld);
-    updateHandheldButton();
-    showToast(`Handheld Mode: ${isHandheld ? 'ON' : 'OFF'}`, 'info');
-  }
-
-  function updateHandheldButton() {
-    const shell = document.getElementById('gba-shell');
-    const btn = document.getElementById('btn-handheld');
-    const isHandheld = shell.classList.contains('mode-handheld');
-    btn.style.background = isHandheld ? 'var(--green)' : '#3a4b6a';
   }
 
   const SLOT_BASE_PREFIX = 'pokeplay_save_slot_';
