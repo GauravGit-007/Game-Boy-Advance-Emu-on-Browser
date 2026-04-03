@@ -36,6 +36,7 @@ function GameBoyAdvanceAudio() {
 	this.SOUND_MAX = 0x400;
 	this.FIFO_MAX = 0x200;
 	this.PSG_MAX = 0x080;
+	this.speed = 1.0;
 };
 
 GameBoyAdvanceAudio.prototype.clear = function() {
@@ -776,7 +777,7 @@ GameBoyAdvanceAudio.prototype.audioProcess = function(audioProcessingEvent) {
 	if (this.masterEnable) {
 		var i;
 		var o = this.outputPointer;
-		for (i = 0; i < this.bufferSize; ++i, o += this.resampleRatio) {
+		for (i = 0; i < this.bufferSize; ++i, o += this.resampleRatio * this.speed) {
 			if (o >= this.maxSamples) {
 				o -= this.maxSamples;
 			}

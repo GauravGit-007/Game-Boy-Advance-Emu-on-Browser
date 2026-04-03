@@ -1,0 +1,129 @@
+# GBA-JS Architecture & Implementation Deep Dive
+
+This document provides a comprehensive technical overview of the GBA-JS emulator, exploring how it processes Game Boy Advance games within a web browser environment.
+
+---
+
+## 1. System Architecture Overview
+
+GBA-JS is structured as a modular emulator where each physical component of the Game Boy Advance hardware is represented by a JavaScript class. The `GameBoyAdvance` object in `gba.js` acts as the "motherboard," orchestrating communication between these sub-systems.
+
+### Component Relationship Diagram
+
+```mermaid
+graph TD
+    GBA[GameBoyAdvance (gba.js)] --> CPU[ARMCore (core.js)]
+    GBA --> MMU[GameBoyAdvanceMMU (mmu.js)]
+    GBA --> IO[GameBoyAdvanceIO (io.js)]
+    GBA --> IRQ[InterruptHandler (irq.js)]
+    GBA --> Video[Video (video.js)]
+    GBA --> Audio[Audio (audio.js)]
+    
+    CPU <--> MMU
+    MMU <--> IO
+    IO <--> Video
+    IO <--> Audio
+    IRQ <--> CPU
+```
+
+- **`gba.js`**: Initializer and orchestrator.
+- **`core.js`**: CPU emulation (ARM7TDMI-S).
+- **`mmu.js`**: Memory management and bus arbitration.
+- **`io.js`**: Memory-mapped I/O register handling.
+- **`irq.js`**: Interrupt management and timing.
+
+---
+
+## 2. The Execution Loop
+
+Rather than using a simple `SetInterval` (which is imprecise), GBA-JS utilizes the browser's `requestAnimationFrame` for its main loop. This ensures the frame rate is synchronized with the display's refresh rate (typically 60Hz).
+
+### Frame Advance Logic (`advanceFrame`)
+When a frame starts:
+1.  **CPU Stepping**: The CPU runs instructions until a internal "seen frame" flag is set (triggered by a VBlank interrupt).
+    ```javascript
+    GameBoyAdvance.prototype.step = function() {
+        while (this.doStep()) { // doStep checks if we've reached VBlank
+            this.cpu.step();
+        }
+    };
+    ```
+2.  **Save Data Flushing**: If the MMU indicates that save data (SRAM/Flash/EEPROM) has changed, it is flushed to browser `localStorage`.
+3.  **Synchronization**: The loop yields control back to the browser to prevent UI freezing and allow for smooth audio buffering.
+
+---
+
+## 3. CPU Core & Register Logic (`core.js`)
+
+The GBA uses an **ARM7TDMI-S** processor, which supports two instruction sets: **ARM** (32-bit) and **Thumb** (16-bit).
+
+### Practical Register Usage
+GBA-JS models the CPU state using a `gprs` (General Purpose Registers) array of type `Int32Array`.
+
+| Register | Name | Logical / Practical Usage |
+| :--- | :--- | :--- |
+| **R0-R12** | GPRs | General data processing. |
+| **R13** | **SP** | Stack Pointer; tracks the top of the CALL stack. |
+| **R14** | **LR** | Link Register; stores the return address for subroutines. |
+| **R15** | **PC** | Program Counter; the address of the next instruction to fetch. |
+
+### Status Flags (CPSR & SPSR)
+The **CPSR** (Current Program Status Register) contains the current mode and flags.
+- **N (Negative)**: Set if result is negative.
+- **Z (Zero)**: Set if result is zero.
+- **C (Carry)**: Set if an operation results in a carry.
+- **V (Overflow)**: Set if an arithmetic overflow occurs.
+- **I/F**: Interrupt mask bits (enable/disable IRQ/FIQ).
+- **T**: State bit (0 = ARM mode, 1 = Thumb mode).
+
+### Register Banking Logic
+ARM processors have multiple operating modes (User, System, IRQ, etc.). When switching modes, some registers are "swapped" with banked versions.
+- **Implementation**: GBA-JS maintains a `bankedRegisters` 2D array. When `switchMode()` is called, the current `SP` and `LR` are saved to the old mode's bank and restored from the new mode's bank.
+
+---
+
+## 4. Instruction Compilation (Dynamic Recompilation)
+
+To achieve high performance, GBA-JS doesn't use a simple `switch-case` interpreter. Instead, it uses a **Dynamic Recompiler (JIT)** approach.
+
+1.  **Fetch**: Fetch the opcode from memory.
+2.  **Compile**: `arm.js` or `thumb.js` parses the opcode and constructs a **JS function (closure)** that performs that specific instruction.
+3.  **Cache**: This function is cached in the `icache` (Instruction Cache) for future use.
+4.  **Execute**: Instead of parsing the same opcode again, the CPU just executes the cached closure.
+
+> [!NOTE]
+> This is why GBA-JS is much faster than traditional JS emulators. It translates GBA assembly logic directly into highly optimizable JavaScript functions.
+
+---
+
+## 5. Memory Management & MMU (`mmu.js`)
+
+The GBA has a 24-bit address space. The MMU's job is to map these addresses to physical buffers or I/O registers.
+
+### Memory Regions
+- **0x00...**: BIOS (16KB)
+- **0x02...**: Work RAM (256KB, external)
+- **0x03...**: Internal Work RAM (32KB, fast)
+- **0x04...**: I/O Registers
+- **0x08...**: Game Pak ROM (up to 32MB)
+
+### Cycle Accuracy & Waitstates
+Different memory regions have different access speeds (waitstates).
+```javascript
+this.WAITSTATES = [ 0, 0, 2, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4 ];
+```
+The MMU tracks these "cycles" precisely. If a game reads from a slow ROM region, the MMU adds the appropriate cycles to the CPU, ensuring the emulator runs at the correct physical speed.
+
+---
+
+## 6. Comparison: JS vs. Native Emulators
+
+| Feature | GBA-JS (Browser) | Native (mGBA / VBA-M) |
+| :--- | :--- | :--- |
+| **Performance** | Relies on JIT engines (V8/SpiderMonkey) | Direct execution or manual x86 JIT. |
+| **Logic** | Higher level, functional closures. | Low-level bit manipulation and assembly. |
+| **Interrupts** | Event-driven (browser loop integration). | Tight, cycle-exact hardware timers. |
+| **Audio** | Buffers via Web Audio API. | Direct hardware buffering. |
+
+### Why "Practically" it works
+Native emulators strive for 100% cycle accuracy. GBA-JS strives for **visible/audible accuracy**. It uses "relaxed" timing where appropriate to maintain performance on mobile devices while still being compatible with nearly all GBA titles.

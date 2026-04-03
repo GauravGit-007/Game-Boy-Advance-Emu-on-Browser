@@ -189,6 +189,16 @@ GameBoyAdvance.prototype.runStable = function() {
 		}
 		
 		// Run a single frame per tick (maximizes browser responsiveness for audio)
+		if (self.multiplier != self.targetMultiplier) {
+			var diff = self.targetMultiplier - self.multiplier;
+			if (Math.abs(diff) < 0.01) {
+				self.multiplier = self.targetMultiplier;
+			} else {
+				self.multiplier += diff * 0.05;
+			}
+			if (self.audio) self.audio.speed = self.multiplier;
+		}
+
 		for (var i = 0; i < self.multiplier; ++i) {
 			self.advanceFrame();
 		}

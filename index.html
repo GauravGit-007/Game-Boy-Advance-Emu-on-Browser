@@ -1383,6 +1383,42 @@
       #gba-shell.mode-joystick .dpad-col .joystick-base { display: block !important; }
       #gba-shell.mode-dpad .dpad-col .dpad { display: block !important; }
       #gba-shell.mode-dpad .dpad-col .joystick-base { display: none !important; }
+
+      /* ── Handheld Mode Layout (Landscape) ── */
+      @media (orientation: landscape) {
+        #gba-shell.mode-handheld .app-layout {
+          display: grid !important;
+          grid-template-columns: 1fr 2fr 1fr !important;
+          flex-direction: row !important;
+        }
+        #gba-shell.mode-handheld .screen-zone {
+          grid-column: 2;
+          width: 100% !important;
+        }
+        #gba-shell.mode-handheld .control-zone {
+          grid-column: 1 / span 3;
+          display: contents !important; /* Allow children to be placed in the grid */
+        }
+        #gba-shell.mode-handheld .shoulder-row {
+          position: absolute; top: 0; width: 100%; z-index: 100;
+          pointer-events: none;
+        }
+        #gba-shell.mode-handheld .shoulder-btn { pointer-events: auto; }
+        #gba-shell.mode-handheld .main-deck {
+          display: contents !important;
+        }
+        #gba-shell.mode-handheld .dpad-col {
+          grid-column: 1; grid-row: 1;
+        }
+        #gba-shell.mode-handheld .action-col {
+          grid-column: 3; grid-row: 1;
+        }
+        #gba-shell.mode-handheld .meta-col {
+          grid-column: 2; grid-row: 2;
+          flex-direction: row !important;
+          transform: translateY(-80px); /* Move Start/Select to mid-bottom */
+        }
+      }
     }
 
     /* ─── INSTRUCTIONS MODAL ─────────────────────────────────────── */
@@ -1679,7 +1715,7 @@
               <!-- Row 1: Shoulders -->
               <div class="shoulder-row">
                 <div class="shoulder-btn btn-l" data-key="a" id="btn-l">L</div>
-                <div class="help-btn" onclick="toggleControlsModal()">⌨️ KEYBINDS</div>
+                <div class="meta-btn" id="btn-speed-mobile" onclick="cycleSpeed()" style="border-radius:8px; width:50px; background:rgba(255,255,255,0.1); color:#fff;">1×</div>
                 <div class="shoulder-btn btn-r" data-key="s" id="btn-r">R</div>
               </div>
 
@@ -1704,6 +1740,7 @@
                   <div class="meta-btn" data-key="Backspace" id="btn-sel">SELECT</div>
                   <div style="display:flex; gap:10px; width:100%; justify-content:center;">
                     <div class="meta-btn" id="btn-mode" onclick="toggleControlLayout()">🕹️ JOY</div>
+                    <div class="meta-btn" id="btn-handheld" onclick="toggleHandheldMode()" style="background:#3a4b6a; color:#fff">📱 HANDHELD</div>
                     <div class="meta-btn" id="btn-edit" onclick="toggleEditMode()" style="background:#2a3b5a; color:var(--amber)">⚙️ EDIT</div>
                   </div>
                   <div class="meta-btn" data-key="Enter"     id="btn-sta">START</div>
@@ -1751,6 +1788,7 @@
                 <div class="speed-btn active" data-speed="1" onclick="setSpeed(1)">1×</div>
                 <div class="speed-btn" data-speed="2" onclick="setSpeed(2)">2×</div>
                 <div class="speed-btn" data-speed="4" onclick="setSpeed(4)">4×</div>
+                <div class="speed-btn" data-speed="8" onclick="setSpeed(8)">8×</div>
               </div>
             </div>
           </div>
@@ -2009,6 +2047,12 @@
     
     const savedLayout = localStorage.getItem('pokeplay_control_mode') || 'mode-dpad';
     document.getElementById('gba-shell').classList.add(savedLayout);
+    
+    if (localStorage.getItem('pokeplay_handheld_mode') === 'true') {
+      document.getElementById('gba-shell').classList.add('mode-handheld');
+      updateHandheldButton();
+    }
+    
     updateLayoutToggleButton();
 
     // Clean up when fullscreen is exited (e.g. pressing back on mobile)
@@ -2145,7 +2189,7 @@
       if (mobileOverlay) mobileOverlay.classList.add('hidden');
       ['btn-pause','btn-reset','btn-fs'].forEach(id => document.getElementById(id).disabled = false);
       setStatus('Running: ' + romName, 'running');
-      if (gba) gba.multiplier = currentSpeed; 
+      if (gba) { gba.targetMultiplier = currentSpeed; gba.multiplier = currentSpeed; } 
       renderSaveSlots();
       showToast('▶ Game started!', 'success');
 
@@ -2189,7 +2233,7 @@
   function setSpeed(speed) {
     currentSpeed = speed;
     document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.speed) === speed));
-    if (gba) gba.multiplier = speed;
+    if (gba) gba.targetMultiplier = speed;
   }
 
   // ─── CONTROL LAYOUT TOGGLE ──────────────────────────────────────
@@ -2211,6 +2255,29 @@
     const btn = document.getElementById('btn-mode');
     const isJoystick = shell.classList.contains('mode-joystick');
     btn.textContent = isJoystick ? '🕹️ JOY' : '🎮 DPAD';
+  }
+
+  function cycleSpeed() {
+    const speeds = [1, 2, 4, 8];
+    let nextIdx = (speeds.indexOf(currentSpeed) + 1) % speeds.length;
+    let nextSpeed = speeds[nextIdx];
+    setSpeed(nextSpeed);
+    document.getElementById('btn-speed-mobile').textContent = nextSpeed + '×';
+  }
+
+  function toggleHandheldMode() {
+    const shell = document.getElementById('gba-shell');
+    const isHandheld = shell.classList.toggle('mode-handheld');
+    localStorage.setItem('pokeplay_handheld_mode', isHandheld);
+    updateHandheldButton();
+    showToast(`Handheld Mode: ${isHandheld ? 'ON' : 'OFF'}`, 'info');
+  }
+
+  function updateHandheldButton() {
+    const shell = document.getElementById('gba-shell');
+    const btn = document.getElementById('btn-handheld');
+    const isHandheld = shell.classList.contains('mode-handheld');
+    btn.style.background = isHandheld ? 'var(--green)' : '#3a4b6a';
   }
 
   const SLOT_BASE_PREFIX = 'pokeplay_save_slot_';
@@ -2560,7 +2627,9 @@
 
   function initEditorDragEngine() {
     // We attach dragging to specific containers
-    const draggableTargets = document.querySelectorAll('.shoulder-btn, .action-btn, .meta-btn:not(#btn-edit), .dpad-col');
+    const draggableTargets = document.querySelectorAll(
+      '.shoulder-btn, .action-btn, .meta-btn:not(#btn-edit), .dpad-col, #gba-canvas-container, #btn-speed-mobile'
+    );
     
     draggableTargets.forEach(el => {
       // Create ID if missing (for dpad-col)
@@ -2586,7 +2655,7 @@
         const currentScale = el.dataset.scale ? parseFloat(el.dataset.scale) : 1.0;
         document.getElementById('edit-scale-slider').parentElement.style.display = 'flex';
         document.getElementById('edit-scale-slider').value = currentScale;
-        document.getElementById('edit-target-label').textContent = "Selected: " + (el.textContent.trim().split(' ')[0] || "Directional Pad");
+        document.getElementById('edit-target-label').textContent = "Selected: " + (el.id === 'gba-canvas-container' ? "Game Screen" : (el.textContent.trim().split(' ')[0] || "Directional Pad"));
 
         initialOffsetX = el.dataset.x ? parseFloat(el.dataset.x) : 0;
         initialOffsetY = el.dataset.y ? parseFloat(el.dataset.y) : 0;
